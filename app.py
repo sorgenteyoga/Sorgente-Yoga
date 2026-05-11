@@ -4,9 +4,10 @@ import os
 import json
 from datetime import datetime
 
-# --- CONFIGURAZIONE ---
+# --- CONFIGURAZIONE PAGINA ---
 st.set_page_config(page_title="SORGENTE YOGA", layout="wide", page_icon="🧘")
 
+# --- FUNZIONI DI SERVIZIO ---
 def get_base64_image(image_path):
     if os.path.exists(image_path):
         with open(image_path, "rb") as img_file:
@@ -35,47 +36,56 @@ icon_testi = get_base64_image("icona_testi.png")
 icon_storia = get_base64_image("icona_storia.png")
 icon_scienza = get_base64_image("icona_scienza.png")
 
-# --- CSS PER POSIZIONAMENTO E SPAZI ---
+# --- CSS AGGIORNATO CON MARGINI DI SICUREZZA ---
 st.markdown(f"""
     <style>
-    /* Rimuove lo spazio vuoto in cima alla pagina */
+    /* Spazio standard in cima alla pagina */
     .block-container {{
-        padding-top: 0rem !important;
+        padding-top: 1rem !important;
         padding-bottom: 1rem !important;
         max-width: 95%;
     }}
     
     .stApp {{ background-color: #FDFCF0; }}
     
-    /* Header più compatto e alto */
+    /* Header Container con sfondo bianco */
     .header-container {{ 
         width: 100%; 
         background-color: white; 
         border-bottom: 3px solid #C5A059; 
-        margin-top: 0px;
-        margin-bottom: 20px; 
+        margin-bottom: 25px; 
     }}
+    
+    /* Immagine Header rimpicciolita e con CUSCINETTO DI SICUREZZA (Padding) */
     .header-image {{ 
         width: 100%; 
-        height: 200px; /* Ridotto da 250 a 200 per risparmiare spazio */
+        height: 180px; /* RIDOTTA per essere più sottile ed elegante */
         background-image: url('data:image/png;base64,{img_header}'); 
-        background-size: cover; 
+        background-size: contain; /* MOSTRA L'IMMAGINE INTERA */
+        background-repeat: no-repeat;
         background-position: center; 
+        background-color: white;
+        
+        /* AGGIUNTO PADDING INTERNO: crea spazio bianco intorno all'immagine */
+        /* così i margini non appariranno mai tagliati */
+        box-sizing: border-box;
+        padding: 15px; /* 15 pixel di respiro su tutti i lati */
     }}
+    
     .header-title-bar {{ 
         background-color: #1A2E44; 
-        padding: 10px; 
+        padding: 12px; 
         color: #FDFCF0; 
         font-family: 'serif'; 
-        font-size: 1.6rem; 
+        font-size: 1.7rem; 
         letter-spacing: 3px; 
         text-align: center; 
     }}
     
-    .article-box {{ background-color: white; padding: 30px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-top: 10px; min-height: 300px; }}
-    .icon-title-container {{ display: flex; align-items: center; gap: 12px; margin-top: 20px; margin-bottom: 10px; }}
+    .article-box {{ background-color: white; padding: 40px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-top: 10px; min-height: 300px; }}
+    .icon-title-container {{ display: flex; align-items: center; gap: 12px; margin-top: 25px; margin-bottom: 10px; }}
     .icon-img {{ width: 30px; height: 30px; object-fit: contain; }}
-    .icon-text {{ font-weight: bold; color: #1A2E44; font-family: 'serif'; font-size: 1.1rem; }}
+    .icon-text {{ font-weight: bold; color: #1A2E44; font-family: 'serif'; font-size: 1.1rem; letter-spacing: 1px;}}
     .resource-link {{ text-decoration: none; color: #1A2E44 !important; font-weight: bold; display: block; padding: 8px 0; border-bottom: 1px solid #eee; }}
     
     #MainMenu, footer, header {{visibility: hidden;}}
@@ -109,7 +119,7 @@ with col_main:
         st.info("✍️ MODALITÀ EDITORE")
         with st.expander("📝 SCRIVI NUOVO ARTICOLO", expanded=True):
             tit_n = st.text_input("Titolo")
-            tes_n = st.text_area("Testo", height=250)
+            tes_n = st.text_area("Testo", height=300)
             if st.button("🚀 Pubblica Articolo"):
                 if tit_n and tes_n:
                     aggiungi_articolo({"data": datetime.now().strftime("%d/%m/%Y"), "titolo": tit_n, "testo": tes_n})
@@ -142,7 +152,7 @@ with col_main:
         </div>
         """, unsafe_allow_html=True)
     else:
-        st.write("Benvenuti. Accedi per iniziare.")
+        st.write("Benvenuti su Sorgente Yoga. Accedi per iniziare a pubblicare.")
 
 with col_nav:
     st.markdown("### 🏛️ BIBLIOTECA")
@@ -176,3 +186,4 @@ with col_nav:
     with st.expander("Istituti e Ricerche"):
         st.markdown('<a class="resource-link" href="https://sleep.hms.harvard.edu/faculty-staff/sat-bir-singh-khalsa" target="_blank">Harvard (Dr. Khalsa) ↗</a>', unsafe_allow_html=True)
         st.markdown('<a class="resource-link" href="https://www.iayt.org/" target="_blank">IAYT Yoga Therapy ↗</a>', unsafe_allow_html=True)
+        st.markdown('<a class="resource-link" href="https://www.kym.org/" target="_blank">KYM Tradition ↗</a>', unsafe_allow_html=True)
