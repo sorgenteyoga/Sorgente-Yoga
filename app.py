@@ -1,38 +1,80 @@
 import streamlit as st
-from Bio import Entrez # Libreria per collegarsi ai database scientifici
+from Bio import Entrez
 
-# --- CONFIGURAZIONE SORGENTE YOGA ---
-st.set_page_config(page_title="SORGENTE YOGA", layout="wide")
+# --- CONFIGURAZIONE ---
+st.set_page_config(page_title="SORGENTE YOGA", layout="wide", page_icon="🧘")
 
-# Firma dell'autore
-st.sidebar.markdown("### SORGENTE YOGA")
-st.sidebar.info("Ricerca e cura di **Luca Valenti**")
+# Stile CSS Personalizzato
+st.markdown("""
+    <style>
+    .main { background-color: #FDFCF0; }
+    h1 { color: #1A2E44; font-family: 'serif'; border-bottom: 2px solid #1A2E44; }
+    h2, h3 { color: #4A3E3E; }
+    .stButton>button { background-color: #1A2E44; color: white; width: 100%; border-radius: 8px; }
+    .source-box { padding: 15px; border-radius: 10px; border: 1px solid #1A2E44; margin-bottom: 10px; background-color: white; }
+    </style>
+    """, unsafe_allow_html=True)
 
-# Titolo principale con stile "Storico"
-st.markdown("<h1 style='text-align: center; color: #4A3E3E;'>SORGENTE YOGA</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; font-style: italic;'>Dalle radici dei testi alla precisione della scienza</p>", unsafe_allow_html=True)
-
-# --- FUNZIONE DI RICERCA SCIENTIFICA ---
-def cerca_yoga_scienza(query):
-    Entrez.email = "tua_email@esempio.com" # Serve per identificarsi a PubMed
-    handle = Entrez.esearch(db="pubmed", term=query, retmax=5)
+# --- FUNZIONI DI RICERCA ---
+def cerca_scienza(query):
+    Entrez.email = "tua_email@esempio.com"
+    handle = Entrez.esearch(db="pubmed", term=query, retmax=3)
     record = Entrez.read(handle)
-    return record["IdList"]
+    results = []
+    for id in record["IdList"]:
+        h = Entrez.esummary(db="pubmed", id=id)
+        r = Entrez.read(h)
+        results.append({"titolo": r[0]['Title'], "link": f"https://pubmed.ncbi.nlm.nih.gov/{id}/"})
+    return results
 
-# --- INTERFACCIA APP ---
-col1, col2 = st.columns(2)
+# --- SIDEBAR ---
+with st.sidebar:
+    st.markdown("## 🧘 SORGENTE YOGA")
+    st.write("---")
+    st.markdown("**Curatore:** Luca Valenti")
+    st.write("Database attivi:")
+    st.caption("- PubMed (Neuroscienze)\n- IAYT (Terapia)\n- JoYS (Filologia)\n- KYM (Tradizione)\n- Harvard Medical School")
 
-with col1:
-    st.header("📜 Storia e Manoscritti")
-    st.write("Sezione dedicata all'Hatha Yoga Project e testi antichi.")
-    # Qui inseriremo i feed dei ricercatori come Mallinson e Birch
+# --- CORPO PRINCIPALE ---
+st.title("SORGENTE YOGA")
+st.markdown("*Integrazione tra saggezza antica e ricerca moderna*")
 
-with col2:
-    st.header("🔬 Pillole di Scienza")
-    st.write("Ultimi aggiornamenti da PubMed su HRV e Neuroscienze.")
-    # Esempio di interazione
-    if st.button("Aggiorna Ricerche Scientifiche"):
-        ids = cerca_yoga_scienza("yoga vagus nerve")
-        st.success(f"Trovati {len(ids)} nuovi articoli!")
-        for id in ids:
-            st.write(f"Articolo PubMed ID: {id} - [Leggi originale](https://pubmed.ncbi.nlm.nih.gov/{id}/)")
+tab1, tab2, tab3 = st.tabs(["🔬 Scienza & Harvard", "📜 Tradizione & Testi", "🏥 Terapia Clinica"])
+
+with tab1:
+    st.header("Ricerca Scientifica e Clinica")
+    col_a, col_b = st.columns(2)
+    with col_a:
+        if st.button("Monitora Dr. Sat Bir Khalsa"):
+            st.subheader("Ultimi studi (Harvard):")
+            res = cerca_scienza("Sat Bir Singh Khalsa")
+            for r in res:
+                st.markdown(f"• [{r['titolo']}]({r['link']})")
+    with col_b:
+        if st.button("Aggiorna HRV & Neuroscienze"):
+            st.subheader("Ultime da PubMed:")
+            res = cerca_scienza("yoga heart rate variability")
+            for r in res:
+                st.markdown(f"• [{r['titolo']}]({r['link']})")
+
+with tab2:
+    st.header("Storia, Filologia e Tradizione")
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("""<div class='source-box'>
+        <h3>Journal of Yoga Studies</h3>
+        <p>Accedi alle ultime pubblicazioni accademiche peer-reviewed.</p>
+        <a href='https://journalofyogastudies.org/index.php/JoYS/issue/archive' target='_blank'>Apri Archivio JoYS</a>
+        </div>""", unsafe_allow_html=True)
+    with c2:
+        st.markdown("""<div class='source-box'>
+        <h3>KYM (Tradizione)</h3>
+        <p>Insegnamenti di T. Krishnamacharya e Desikachar.</p>
+        <a href='https://www.kym.org/' target='_blank'>Visita il Mandiram</a>
+        </div>""", unsafe_allow_html=True)
+
+with tab3:
+    st.header("Applicazioni Terapeutiche")
+    st.markdown("### IAYT - International Association of Yoga Therapists")
+    st.write("Accedi alle risorse per lo Yoga Therapy professionale.")
+    st.link_button("Vai al database IAYT", "https://www.iayt.org/")
