@@ -4,13 +4,13 @@ from Bio import Entrez
 # --- CONFIGURAZIONE ---
 st.set_page_config(page_title="SORGENTE YOGA", layout="wide", page_icon="🧘")
 
-# --- DESIGN DEFINITIVO (Barra Superiore e Pulizia) ---
+# --- DESIGN PROFESSIONALE ---
 st.markdown("""
     <style>
-    /* Barra Superiore Elegante */
+    .stApp { background-color: #FDFCF0; padding-top: 60px; }
     .top-bar {
         background-color: #1A2E44;
-        height: 60px;
+        height: 70px;
         width: 100%;
         position: fixed;
         top: 0;
@@ -18,33 +18,36 @@ st.markdown("""
         z-index: 999;
         display: flex;
         align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        padding-left: 50px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .top-bar-title {
-        color: #FDFCF0;
-        font-family: 'serif';
-        font-size: 1.5rem;
-        letter-spacing: 2px;
+    .top-bar-title { color: #FDFCF0; font-family: 'serif'; font-size: 1.8rem; letter-spacing: 3px; }
+    
+    /* Stile Articolo Pubblico */
+    .article-title { font-family: 'serif'; color: #1A2E44; font-size: 3rem; line-height: 1.2; margin-bottom: 10px; }
+    .article-meta { font-style: italic; color: #C5A059; margin-bottom: 30px; font-size: 1.1rem; }
+    .article-content { 
+        font-family: 'serif'; 
+        font-size: 1.3rem; 
+        line-height: 1.8; 
+        color: #2D2D2D;
+        background: white;
+        padding: 40px;
+        border-radius: 2px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
     }
-    /* Regolazioni Corpo Pagina */
-    .stApp { background-color: #FDFCF0; padding-top: 80px; }
-    h1, h2, h3 { font-family: 'serif' !important; color: #1A2E44 !important; }
-    .editor-container {
-        background-color: #ffffff;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        min-height: 700px;
-    }
-    .tool-card {
-        background-color: #ffffff;
+    
+    /* Sidebar Risorse */
+    .resource-card {
+        background-color: white;
         padding: 15px;
-        border-radius: 10px;
-        border: 1px solid #C5A059;
-        margin-bottom: 20px;
+        border-radius: 8px;
+        border-bottom: 3px solid #C5A059;
+        margin-bottom: 15px;
+        transition: 0.3s;
     }
-    /* Nascondi Elementi Streamlit */
+    .resource-card:hover { transform: translateX(5px); }
+    
     #MainMenu, footer, header {visibility: hidden;}
     </style>
     
@@ -53,65 +56,71 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# --- FUNZIONE PUBMED ---
-def cerca_pubmed(query):
-    Entrez.email = "tua_email@esempio.com"
-    try:
-        handle = Entrez.esearch(db="pubmed", term=query, retmax=3)
-        record = Entrez.read(handle)
-        res = []
-        for id in record["IdList"]:
-            h = Entrez.esummary(db="pubmed", id=id)
-            r = Entrez.read(h)
-            res.append({"t": r[0]['Title'], "l": f"https://pubmed.ncbi.nlm.nih.gov/{id}/"})
-        return res
-    except: return []
+# --- STATO DELL'APP (Per gestire la password) ---
+if 'admin' not in st.session_state:
+    st.session_state['admin'] = False
 
-# --- LAYOUT PRINCIPALE ---
-col_main, col_tools = st.columns([0.65, 0.35], gap="large")
+# --- SIDEBAR DI CONTROLLO (Solo per te) ---
+with st.sidebar:
+    st.write("### 🔑 Accesso Autore")
+    pwd = st.text_input("Inserisci Password", type="password")
+    if pwd == "sorgente2026": # Puoi cambiare questa password
+        st.session_state['admin'] = True
+        st.success("Modalità Editor Attiva")
+    else:
+        st.session_state['admin'] = False
+
+# --- LOGICA DI VISUALIZZAZIONE ---
+col_main, col_nav = st.columns([0.7, 0.3], gap="large")
 
 with col_main:
-    st.markdown("<div class='editor-container'>", unsafe_allow_html=True)
-    st.markdown("<h1>Editoriale</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='font-style: italic;'>A cura di Luca Valenti</p>", unsafe_allow_html=True)
+    if st.session_state['admin']:
+        # VISTA EDITOR (Cosa vedi tu per scrivere)
+        st.subheader("✍️ Editor Articolo")
+        titolo_edit = st.text_input("Titolo Pubblico", value="Il Respiro tra Tradizione e Scienza")
+        contenuto_edit = st.text_area("Contenuto del Blog", height=500, value="Scrivi qui il tuo articolo...")
+        if st.button("Aggiorna Blog"):
+            st.toast("Articolo Pubblicato!")
+            # Qui memorizziamo temporaneamente i dati
+            st.session_state['titolo_pub'] = titolo_edit
+            st.session_state['testo_pub'] = contenuto_edit
     
-    titolo = st.text_input("TITOLO DELL'ARTICOLO", value="Il Respiro tra Tradizione e Scienza")
-    testo = st.text_area("CORPO DELLA RICERCA", height=600, placeholder="Inizia a scrivere...")
+    # VISTA PUBBLICA (Cosa vede la gente)
+    t = st.session_state.get('titolo_pub', "Benvenuti su Sorgente Yoga")
+    c = st.session_state.get('testo_pub', "Inizia la tua esplorazione attraverso la sidebar delle risorse.")
     
-    if st.button("Pubblica/Salva Ricerca"):
-        st.success("Articolo salvato correttamente!")
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='article-title'>{t}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='article-meta'>Ricerca e testi di Luca Valenti</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='article-content'>{c}</div>", unsafe_allow_html=True)
 
-with col_tools:
-    st.markdown("<h3>Strumenti</h3>", unsafe_allow_html=True)
+with col_nav:
+    st.markdown("### 🏛️ BIBLIOTECA DIGITALE")
+    st.write("Seleziona una categoria per approfondire")
     
-    # SEZIONE STORIA
-    st.markdown("<div class='tool-card'>", unsafe_allow_html=True)
-    st.markdown("<b>STORIA E TESTI ANTICHI</b>", unsafe_allow_html=True)
-    st.markdown("<br><a href='https://journalofyogastudies.org/index.php/JoYS/issue/archive' target='_blank'>Journal of Yoga Studies ↗</a>", unsafe_allow_html=True)
-    st.markdown("<br><a href='https://www.kym.org/' target='_blank'>Krishnamacharya Yoga Mandiram ↗</a>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
+    # CATEGORIA: STORIA
+    with st.expander("📜 STORIA E TESTI ANTICHI", expanded=True):
+        st.markdown("""
+        <div class='resource-card'>
+            <a href='https://journalofyogastudies.org/index.php/JoYS/issue/archive' target='_blank' style='text-decoration:none; color:#1A2E44; font-weight:bold;'>Journal of Yoga Studies ↗</a><br>
+            <small>Ricerca accademica internazionale</small>
+        </div>
+        <div class='resource-card'>
+            <a href='https://www.kym.org/' target='_blank' style='text-decoration:none; color:#1A2E44; font-weight:bold;'>Krishnamacharya Yoga Mandiram ↗</a><br>
+            <small>Tradizione vivente e Viniyoga</small>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # SEZIONE SCIENZA
-    st.markdown("<div class='tool-card'>", unsafe_allow_html=True)
-    st.markdown("<b>STUDI SCIENTIFICI</b>", unsafe_allow_html=True)
-    if st.button("🔍 Cerca Sat Bir Khalsa"):
-        articoli = cerca_pubmed("Sat Bir Singh Khalsa")
-        for a in articoli:
-            st.markdown(f"<small>• <a href='{a['l']}'>{a['t']}</a></small>", unsafe_allow_html=True)
-    
-    st.write("")
-    
-    if st.button("🧬 Cerca HRV & Neuro"):
-        articoli = cerca_pubmed("yoga heart rate variability")
-        for a in articoli:
-            st.markdown(f"<small>• <a href='{a['l']}'>{a['t']}</a></small>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # SEZIONE IMMAGINI
-    st.markdown("<div class='tool-card'>", unsafe_allow_html=True)
-    st.markdown("<b>ARCHIVIO VISIVO</b>", unsafe_allow_html=True)
-    up = st.file_uploader("Carica file", type=["jpg","png","jpeg"], label_visibility="collapsed")
-    if up:
-        st.image(up)
-    st.markdown("</div>", unsafe_allow_html=True)
+    # CATEGORIA: SCIENZA
+    with st.expander("🔬 STUDI SCIENTIFICI", expanded=True):
+        st.markdown("""
+        <div class='resource-card'>
+            <a href='https://sleep.hms.harvard.edu/faculty-staff/sat-bir-singh-khalsa' target='_blank' style='text-decoration:none; color:#1A2E44; font-weight:bold;'>Harvard Medical School ↗</a><br>
+            <small>Laboratorio del Dr. Sat Bir Khalsa</small>
+        </div>
+        <div class='resource-card'>
+            <a href='https://www.iayt.org/' target='_blank' style='text-decoration:none; color:#1A2E44; font-weight:bold;'>IAYT Yoga Therapy ↗</a><br>
+            <small>Protocolli clinici e ricerca</small>
+        </div>
+        """, unsafe_allow_html=True)
+        
+    st.info("💡 Nuovi tasti e siti verranno aggiunti man mano alla tua biblioteca digitale.")
