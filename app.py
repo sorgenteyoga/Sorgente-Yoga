@@ -70,6 +70,7 @@ tutti_gli_articoli = carica_articoli()
 col_main, col_nav = st.columns([0.7, 0.3], gap="large")
 
 with col_main:
+    # AREA ACCESSO
     if not st.session_state['admin']:
         with st.expander("🔑 Area Autore"):
             pwd = st.text_input("Password", type="password")
@@ -77,10 +78,10 @@ with col_main:
                 st.session_state['admin'] = True
                 st.rerun()
     
+    # AREA EDITORE (NUOVO, MODIFICA, ELIMINA)
     if st.session_state['admin']:
         st.info("✍️ MODALITÀ EDITORE")
         
-        # --- SEZIONE: NUOVO ARTICOLO ---
         with st.expander("📝 SCRIVI NUOVO ARTICOLO"):
             tit_n = st.text_input("Titolo nuovo")
             tes_n = st.text_area("Testo nuovo", height=250)
@@ -89,60 +90,75 @@ with col_main:
                     aggiungi_articolo({"data": datetime.now().strftime("%d/%m/%Y"), "titolo": tit_n, "testo": tes_n})
                     st.rerun()
 
-        # --- SEZIONE: MODIFICA ---
         with st.expander("✏️ MODIFICA ARTICOLO ESISTENTE"):
             if tutti_gli_articoli:
-                nomi_articoli = [a['titolo'] for a in tutti_gli_articoli]
-                scelta = st.selectbox("Quale articolo vuoi modificare?", nomi_articoli)
-                indice = nomi_articoli.index(scelta)
-                
-                edit_titolo = st.text_input("Modifica Titolo", tutti_gli_articoli[indice]['titolo'])
-                edit_testo = st.text_area("Modifica Testo", tutti_gli_articoli[indice]['testo'], height=300)
-                
+                nomi = [a['titolo'] for a in tutti_gli_articoli]
+                scelta = st.selectbox("Seleziona articolo", nomi)
+                idx = nomi.index(scelta)
+                edit_tit = st.text_input("Titolo", tutti_gli_articoli[idx]['titolo'])
+                edit_tes = st.text_area("Testo", tutti_gli_articoli[idx]['testo'], height=300)
                 if st.button("💾 Salva Modifiche"):
-                    tutti_gli_articoli[indice]['titolo'] = edit_titolo
-                    tutti_gli_articoli[indice]['testo'] = edit_testo
+                    tutti_gli_articoli[idx]['titolo'] = edit_tit
+                    tutti_gli_articoli[idx]['testo'] = edit_tes
                     salva_tutti_articoli(tutti_gli_articoli)
-                    st.success("Modifica salvata!")
+                    st.success("Aggiornato!")
                     st.rerun()
-            else:
-                st.write("Nulla da modificare.")
 
-        # --- SEZIONE: ELIMINA ---
         with st.expander("🗑️ ELIMINA ARTICOLI"):
-            if tutti_gli_articoli:
-                for idx, a in enumerate(tutti_gli_articoli):
-                    c_t, c_b = st.columns([0.8, 0.2])
-                    c_t.write(a['titolo'])
-                    if c_b.button("Elimina", key=f"del_{idx}"):
-                        nuova_lista = [art for i, art in enumerate(tutti_gli_articoli) if i != idx]
-                        salva_tutti_articoli(nuova_lista)
-                        st.rerun()
+            for i, a in enumerate(tutti_gli_articoli):
+                c1, c2 = st.columns([0.8, 0.2])
+                c1.write(a['titolo'])
+                if c2.button("Elimina", key=f"del_{i}"):
+                    nuova_lista = [art for j, art in enumerate(tutti_gli_articoli) if i != j]
+                    salva_tutti_articoli(nuova_lista)
+                    st.rerun()
 
         if st.button("🔒 Esci"):
             st.session_state['admin'] = False
             st.rerun()
 
-    # --- DISPLAY ---
+    # VISUALIZZAZIONE ARTICOLO
     art = st.session_state['articolo_selezionato'] if st.session_state['articolo_selezionato'] else (tutti_gli_articoli[0] if tutti_gli_articoli else None)
     if art:
         st.markdown(f"""
         <div class="article-box">
             <h1 style='font-family:serif; color:#1A2E44; margin-top:0;'>{art['titolo']}</h1>
             <p style='font-style:italic; color:#C5A059;'>{art['data']} • Luca Valenti</p>
-            <div style="font-family:serif; font-size:1.3rem; line-height:1.8; white-space: pre-wrap !important; word-wrap: break-word; display: block;">
-                {art['testo']}
-            </div>
+            <div style="font-family:serif; font-size:1.3rem; line-height:1.8; white-space: pre-wrap !important; word-wrap: break-word;">{art['testo']}</div>
         </div>
         """, unsafe_allow_html=True)
+    else:
+        st.write("Benvenuti su Sorgente Yoga.")
 
 with col_nav:
     st.markdown("### 🏛️ BIBLIOTECA")
+    
+    # ARCHIVIO
     st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_archivio}" class="icon-img"><span class="icon-text">ARCHIVIO BLOG</span></div>', unsafe_allow_html=True)
-    with st.expander("Sfoglia", expanded=True):
+    with st.expander("Sfoglia articoli", expanded=True):
         if tutti_gli_articoli:
             for i, a in enumerate(tutti_gli_articoli):
                 if st.button(f"📄 {a['titolo']}", key=f"nav_{i}"):
                     st.session_state['articolo_selezionato'] = a
                     st.rerun()
-    # (Seguono le altre sezioni Testi, Storia, Scienza come prima...)
+        else: st.caption("Vuoto.")
+
+    # TESTI CLASSICI
+    st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_testi}" class="icon-img"><span class="icon-text">TESTI CLASSICI</span></div>', unsafe_allow_html=True)
+    with st.expander("Elenco testi"):
+        st.write("• Yoga Sūtra (Patañjali)")
+        st.write("• Haṭha Yoga Pradīpikā")
+        st.write("• Gheraṇḍa Saṃhitā")
+        st.write("• Bhagavad Gītā")
+
+    # RICERCA STORICA
+    st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_storia}" class="icon-img"><span class="icon-text">RICERCA STORICA</span></div>', unsafe_allow_html=True)
+    with st.expander("Siti e Progetti"):
+        st.markdown('<a class="resource-link" href="http://hyp.soas.ac.uk/" target="_blank">Hatha Yoga Project ↗</a>', unsafe_allow_html=True)
+        st.markdown('<a class="resource-link" href="https://journalofyogastudies.org/index.php/JoYS/issue/archive" target="_blank">Journal of Yoga Studies ↗</a>', unsafe_allow_html=True)
+
+    # SCIENZA
+    st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_scienza}" class="icon-img"><span class="icon-text">SCIENZA</span></div>', unsafe_allow_html=True)
+    with st.expander("Istituti e Ricerche"):
+        st.markdown('<a class="resource-link" href="https://sleep.hms.harvard.edu/faculty-staff/sat-bir-singh-khalsa" target="_blank">Harvard (Dr. Khalsa) ↗</a>', unsafe_allow_html=True)
+        st.markdown('<a class="resource-link" href="https://www.iayt.org/" target="_blank">IAYT Yoga Therapy ↗</a>', unsafe_allow_html=True)
