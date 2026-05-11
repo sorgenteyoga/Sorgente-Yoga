@@ -9,11 +9,9 @@ st.set_page_config(page_title="SORGENTE YOGA", layout="wide", page_icon="🧘")
 def get_base64_image(image_path):
     if os.path.exists(image_path):
         with open(image_path, "rb") as img_file:
-            # Codifica specifica per PNG
             return base64.b64encode(img_file.read()).decode()
     return None
 
-# Cerco il file 'header_yoga.png'
 img_base64 = get_base64_image("header_yoga.png")
 
 # --- DESIGN ESTETICO ---
@@ -21,7 +19,6 @@ st.markdown(f"""
     <style>
     .stApp {{ background-color: #FDFCF0; }}
     
-    /* Header con Immagine PNG */
     .header-container {{
         width: 100%;
         background-color: white;
@@ -32,7 +29,6 @@ st.markdown(f"""
     .header-image {{
         width: 100%;
         height: 250px;
-        /* Specifica MIME per PNG */
         background-image: url('data:image/png;base64,{img_base64 if img_base64 else ""}');
         background-size: cover;
         background-position: center;
@@ -48,7 +44,6 @@ st.markdown(f"""
         text-align: center;
     }}
     
-    /* Corpo Articolo */
     .article-box {{
         background-color: white;
         padding: 40px;
@@ -64,16 +59,6 @@ st.markdown(f"""
         font-family: 'serif'; font-size: 1.3rem; line-height: 1.8; color: #2D2D2D;
     }}
 
-    /* Area Accesso (In pagina) */
-    .access-box {{
-        background-color: #f0ede0;
-        padding: 20px;
-        border-radius: 5px;
-        border: 1px solid #C5A059;
-        margin-bottom: 30px;
-    }}
-
-    /* Risorse a destra */
     .resource-link {{ 
         text-decoration: none; 
         color: #1A2E44 !important; 
@@ -82,7 +67,14 @@ st.markdown(f"""
         padding: 8px 0; 
         font-family: 'Lato', sans-serif;
     }}
-    .stExpander {{ background-color: white !important; border-radius: 5px; }}
+    
+    /* Stile per elenco testi (senza link) */
+    .text-item {{
+        color: #4A3E3E;
+        font-family: 'Lato', sans-serif;
+        padding: 5px 0;
+        border-bottom: 1px dotted #C5A059;
+    }}
     
     #MainMenu, footer, header {{visibility: hidden;}}
     </style>
@@ -93,71 +85,65 @@ st.markdown(f"""
     </div>
     """, unsafe_allow_html=True)
 
-# --- LOGICA DI ACCESSO (In pagina) ---
+# --- LOGICA DI ACCESSO ---
 if 'admin' not in st.session_state:
     st.session_state['admin'] = False
 
-# Layout a due colonne
 col_main, col_nav = st.columns([0.7, 0.3], gap="large")
 
 with col_main:
-    # Mostro il box di accesso solo se non sono loggato
     if not st.session_state['admin']:
         with st.container():
             st.markdown("### 🔑 ACCESSO AUTORE")
             pwd = st.text_input("Inserisci password per scrivere", type="password", key="login_pwd")
             if pwd == "sorgente2026":
                 st.session_state['admin'] = True
-                st.rerun() # Ricarico la pagina per mostrare l'editor
-            elif pwd:
-                st.error("Password errata.")
+                st.rerun()
     
-    # --- AREA SCRITTURA (Appare solo dopo il login) ---
     if st.session_state['admin']:
-        st.markdown("### ✍️ AREA EDITORIALE (Luca Valenti)")
+        st.markdown("### ✍️ AREA EDITORIALE")
+        titolo_input = st.text_input("Titolo Articolo", value=st.session_state.get('titolo_pub', ""))
+        testo_input = st.text_area("Testo Articolo", height=400, value=st.session_state.get('testo_pub', ""))
         
-        # Carico i valori salvati o stringhe vuote
-        default_title = st.session_state.get('titolo_pub', "")
-        default_text = st.session_state.get('testo_pub', "")
-        
-        titolo_input = st.text_input("Titolo Articolo pubblico", value=default_title)
-        testo_input = st.text_area("Testo Articolo pubblico", height=400, value=default_text)
-        
-        col_btn1, col_btn2 = st.columns(2)
-        with col_btn1:
-            if st.button("Pubblica/Aggiorna Online"):
+        c1, c2 = st.columns(2)
+        with c1:
+            if st.button("Aggiorna Online"):
                 st.session_state['titolo_pub'] = titolo_input
                 st.session_state['testo_pub'] = testo_input
-                st.success("Articolo pubblicato online!")
-        with col_btn2:
+                st.success("Articolo pubblicato!")
+        with c2:
             if st.button("Logout"):
                 st.session_state['admin'] = False
                 st.rerun()
-        
         st.markdown("---")
 
-    # --- VISUALIZZAZIONE PUBBLICA (Quello che leggono tutti) ---
-    t_finale = st.session_state.get('titolo_pub', "Benvenuti su Sorgente Yoga")
-    c_finale = st.session_state.get('testo_pub', "Esegui l'accesso sopra per inserire il tuo primo studio.")
+    t_f = st.session_state.get('titolo_pub', "Benvenuti su Sorgente Yoga")
+    c_f = st.session_state.get('testo_pub', "Accedi per pubblicare contenuti.")
     
-    # Box dell'articolo
     st.markdown(f"""
     <div class="article-box">
-        <h1>{t_finale}</h1>
+        <h1>{t_f}</h1>
         <div class="author-sub">Ricerca e testi a cura di Luca Valenti</div>
-        <div class="article-content">{c_finale}</div>
+        <div class="article-content">{c_f}</div>
     </div>
     """, unsafe_allow_html=True)
 
 with col_nav:
     st.markdown("### 🏛️ BIBLIOTECA")
 
-    # Menù a scomparsa
-    with st.expander("📜 STORIA E TESTI ANTICHI", expanded=True):
+    # NUOVO TASTO: ELENCO TESTI ANTICHI
+    with st.expander("📖 TESTI CLASSICI INSERITI", expanded=False):
+        st.markdown("<div class='text-item'>• Yoga Sūtra (Patañjali)</div>", unsafe_allow_html=True)
+        st.markdown("<div class='text-item'>• Haṭha Yoga Pradīpikā</div>", unsafe_allow_html=True)
+        st.markdown("<div class='text-item'>• Gheraṇḍa Saṃhitā</div>", unsafe_allow_html=True)
+        st.markdown("<div class='text-item'>• Bhagavad Gītā</div>", unsafe_allow_html=True)
+        st.info("Aggiungeremo qui i testi man mano che verranno trattati nel blog.")
+
+    with st.expander("📜 SITI DI STORIA E RICERCA", expanded=True):
         st.markdown(f'<a class="resource-link" href="http://hyp.soas.ac.uk/" target="_blank">Hatha Yoga Project ↗</a>', unsafe_allow_html=True)
         st.markdown(f'<a class="resource-link" href="https://journalofyogastudies.org/index.php/JoYS/issue/archive" target="_blank">Journal of Yoga Studies ↗</a>', unsafe_allow_html=True)
 
-    with st.expander("🔬 STUDI SCIENTIFICI", expanded=True):
+    with st.expander("🔬 RICERCA SCIENTIFICA", expanded=True):
         st.markdown(f'<a class="resource-link" href="https://sleep.hms.harvard.edu/faculty-staff/sat-bir-singh-khalsa" target="_blank">Harvard (Dr. Khalsa) ↗</a>', unsafe_allow_html=True)
         st.markdown(f'<a class="resource-link" href="https://www.iayt.org/" target="_blank">IAYT Yoga Therapy ↗</a>', unsafe_allow_html=True)
         st.markdown(f'<a class="resource-link" href="https://www.kym.org/" target="_blank">KYM Tradition ↗</a>', unsafe_allow_html=True)
