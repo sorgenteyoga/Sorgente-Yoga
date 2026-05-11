@@ -35,26 +35,59 @@ icon_testi = get_base64_image("icona_testi.png")
 icon_storia = get_base64_image("icona_storia.png")
 icon_scienza = get_base64_image("icona_scienza.png")
 
-# --- CSS ---
+# --- CSS PER POSIZIONAMENTO E SPAZI ---
 st.markdown(f"""
     <style>
+    /* Rimuove lo spazio vuoto in cima alla pagina */
+    .block-container {{
+        padding-top: 0rem !important;
+        padding-bottom: 1rem !important;
+        max-width: 95%;
+    }}
+    
     .stApp {{ background-color: #FDFCF0; }}
-    .header-container {{ width: 100%; background-color: white; border-bottom: 3px solid #C5A059; margin-bottom: 30px; }}
-    .header-image {{ width: 100%; height: 250px; background-image: url('data:image/png;base64,{img_header}'); background-size: cover; background-position: center; }}
-    .header-title-bar {{ background-color: #1A2E44; padding: 15px; color: #FDFCF0; font-family: 'serif'; font-size: 1.8rem; letter-spacing: 3px; text-align: center; }}
-    .article-box {{ background-color: white; padding: 40px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-top: 20px; min-height: 300px; }}
-    .icon-title-container {{ display: flex; align-items: center; gap: 12px; margin-top: 25px; margin-bottom: 10px; }}
-    .icon-img {{ width: 35px; height: 35px; object-fit: contain; }}
+    
+    /* Header più compatto e alto */
+    .header-container {{ 
+        width: 100%; 
+        background-color: white; 
+        border-bottom: 3px solid #C5A059; 
+        margin-top: 0px;
+        margin-bottom: 20px; 
+    }}
+    .header-image {{ 
+        width: 100%; 
+        height: 200px; /* Ridotto da 250 a 200 per risparmiare spazio */
+        background-image: url('data:image/png;base64,{img_header}'); 
+        background-size: cover; 
+        background-position: center; 
+    }}
+    .header-title-bar {{ 
+        background-color: #1A2E44; 
+        padding: 10px; 
+        color: #FDFCF0; 
+        font-family: 'serif'; 
+        font-size: 1.6rem; 
+        letter-spacing: 3px; 
+        text-align: center; 
+    }}
+    
+    .article-box {{ background-color: white; padding: 30px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-top: 10px; min-height: 300px; }}
+    .icon-title-container {{ display: flex; align-items: center; gap: 12px; margin-top: 20px; margin-bottom: 10px; }}
+    .icon-img {{ width: 30px; height: 30px; object-fit: contain; }}
     .icon-text {{ font-weight: bold; color: #1A2E44; font-family: 'serif'; font-size: 1.1rem; }}
     .resource-link {{ text-decoration: none; color: #1A2E44 !important; font-weight: bold; display: block; padding: 8px 0; border-bottom: 1px solid #eee; }}
+    
     #MainMenu, footer, header {{visibility: hidden;}}
     </style>
+    
     <div class="header-container">
         <div class="header-image"></div>
         <div class="header-title-bar">S O R G E N T E &nbsp; Y O G A</div>
     </div>
     """, unsafe_allow_html=True)
 
+# --- LOGICA DI SESSIONE ---
 if 'admin' not in st.session_state: st.session_state['admin'] = False
 if 'articolo_selezionato' not in st.session_state: st.session_state['articolo_selezionato'] = None
 
@@ -63,7 +96,7 @@ tutti_gli_articoli = carica_articoli()
 col_main, col_nav = st.columns([0.7, 0.3], gap="large")
 
 with col_main:
-    # --- ACCESSO ---
+    # AREA ACCESSO
     if not st.session_state['admin']:
         with st.expander("🔑 Area Autore"):
             pwd = st.text_input("Password", type="password")
@@ -71,10 +104,9 @@ with col_main:
                 st.session_state['admin'] = True
                 st.rerun()
     
-    # --- AREA EDITORIALE ---
+    # AREA EDITORE
     if st.session_state['admin']:
         st.info("✍️ MODALITÀ EDITORE")
-        
         with st.expander("📝 SCRIVI NUOVO ARTICOLO", expanded=True):
             tit_n = st.text_input("Titolo")
             tes_n = st.text_area("Testo", height=250)
@@ -84,7 +116,7 @@ with col_main:
                     st.success("Articolo pubblicato!")
                     st.rerun()
 
-        with st.expander("🗑️ GESTIONE ARCHIVIO (Elimina Singoli)"):
+        with st.expander("🗑️ GESTIONE ARCHIVIO"):
             if tutti_gli_articoli:
                 for idx, a in enumerate(tutti_gli_articoli):
                     c_tit, c_del = st.columns([0.8, 0.2])
@@ -94,30 +126,28 @@ with col_main:
                         salva_tutti_articoli(nuova_lista)
                         st.session_state['articolo_selezionato'] = None
                         st.rerun()
-            else:
-                st.write("Nessun articolo da eliminare.")
 
         if st.button("🔒 Esci dalla modalità editore"):
             st.session_state['admin'] = False
             st.rerun()
 
-    # --- VISUALIZZAZIONE ARTICOLO ---
+    # VISUALIZZAZIONE ARTICOLO
     art = st.session_state['articolo_selezionato'] if st.session_state['articolo_selezionato'] else (tutti_gli_articoli[0] if tutti_gli_articoli else None)
     if art:
         st.markdown(f"""
         <div class="article-box">
-            <h1 style='font-family:serif; color:#1A2E44;'>{art['titolo']}</h1>
+            <h1 style='font-family:serif; color:#1A2E44; margin-top:0;'>{art['titolo']}</h1>
             <p style='font-style:italic; color:#C5A059;'>{art['data']} • Luca Valenti</p>
             <div style='font-family:serif; font-size:1.3rem; line-height:1.8; white-space: pre-wrap;'>{art['testo']}</div>
         </div>
         """, unsafe_allow_html=True)
     else:
-        st.write("Benvenuti su Sorgente Yoga. Accedi per pubblicare il tuo primo studio.")
+        st.write("Benvenuti. Accedi per iniziare.")
 
 with col_nav:
     st.markdown("### 🏛️ BIBLIOTECA")
     
-    # 1. ARCHIVIO BLOG
+    # ARCHIVIO
     st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_archivio}" class="icon-img"><span class="icon-text">ARCHIVIO BLOG</span></div>', unsafe_allow_html=True)
     with st.expander("Sfoglia articoli", expanded=True):
         if tutti_gli_articoli:
@@ -125,10 +155,9 @@ with col_nav:
                 if st.button(f"📄 {a['titolo']}", key=f"nav_{i}"):
                     st.session_state['articolo_selezionato'] = a
                     st.rerun()
-        else:
-            st.caption("Vuoto.")
+        else: st.caption("Vuoto.")
 
-    # 2. TESTI CLASSICI
+    # TESTI CLASSICI
     st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_testi}" class="icon-img"><span class="icon-text">TESTI CLASSICI</span></div>', unsafe_allow_html=True)
     with st.expander("Elenco testi"):
         st.write("• Yoga Sūtra (Patañjali)")
@@ -136,15 +165,14 @@ with col_nav:
         st.write("• Gheraṇḍa Saṃhitā")
         st.write("• Bhagavad Gītā")
 
-    # 3. RICERCA STORICA
+    # RICERCA STORICA
     st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_storia}" class="icon-img"><span class="icon-text">RICERCA STORICA</span></div>', unsafe_allow_html=True)
     with st.expander("Siti e Progetti"):
         st.markdown('<a class="resource-link" href="http://hyp.soas.ac.uk/" target="_blank">Hatha Yoga Project ↗</a>', unsafe_allow_html=True)
         st.markdown('<a class="resource-link" href="https://journalofyogastudies.org/index.php/JoYS/issue/archive" target="_blank">Journal of Yoga Studies ↗</a>', unsafe_allow_html=True)
 
-    # 4. SCIENZA
+    # SCIENZA
     st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_scienza}" class="icon-img"><span class="icon-text">SCIENZA</span></div>', unsafe_allow_html=True)
     with st.expander("Istituti e Ricerche"):
         st.markdown('<a class="resource-link" href="https://sleep.hms.harvard.edu/faculty-staff/sat-bir-singh-khalsa" target="_blank">Harvard (Dr. Khalsa) ↗</a>', unsafe_allow_html=True)
         st.markdown('<a class="resource-link" href="https://www.iayt.org/" target="_blank">IAYT Yoga Therapy ↗</a>', unsafe_allow_html=True)
-        st.markdown('<a class="resource-link" href="https://www.kym.org/" target="_blank">KYM Tradition ↗</a>', unsafe_allow_html=True)
