@@ -12,7 +12,7 @@ def get_base64_image(image_path):
             return base64.b64encode(img_file.read()).decode()
     return None
 
-img_base64 = get_base64_image("header_yoga.jpg")
+img_base64 = get_base64_image("header_yoga.png")
 
 # --- DESIGN ---
 st.markdown(f"""
