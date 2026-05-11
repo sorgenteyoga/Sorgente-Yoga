@@ -23,7 +23,6 @@ st.markdown("""
     }
     .top-bar-title { color: #FDFCF0; font-family: 'serif'; font-size: 1.8rem; letter-spacing: 3px; }
     
-    /* Stile Articolo Pubblico */
     .article-title { font-family: 'serif'; color: #1A2E44; font-size: 3rem; line-height: 1.2; margin-bottom: 10px; }
     .article-meta { font-style: italic; color: #C5A059; margin-bottom: 30px; font-size: 1.1rem; }
     .article-content { 
@@ -37,7 +36,6 @@ st.markdown("""
         box-shadow: 0 2px 10px rgba(0,0,0,0.02);
     }
     
-    /* Sidebar Risorse */
     .resource-card {
         background-color: white;
         padding: 15px;
@@ -56,7 +54,7 @@ st.markdown("""
     </div>
     """, unsafe_allow_html=True)
 
-# --- STATO DELL'APP (Per gestire la password) ---
+# --- STATO DELL'APP ---
 if 'admin' not in st.session_state:
     st.session_state['admin'] = False
 
@@ -64,7 +62,7 @@ if 'admin' not in st.session_state:
 with st.sidebar:
     st.write("### 🔑 Accesso Autore")
     pwd = st.text_input("Inserisci Password", type="password")
-    if pwd == "sorgente2026": # Puoi cambiare questa password
+    if pwd == "sorgente2026":
         st.session_state['admin'] = True
         st.success("Modalità Editor Attiva")
     else:
@@ -75,19 +73,16 @@ col_main, col_nav = st.columns([0.7, 0.3], gap="large")
 
 with col_main:
     if st.session_state['admin']:
-        # VISTA EDITOR (Cosa vedi tu per scrivere)
         st.subheader("✍️ Editor Articolo")
         titolo_edit = st.text_input("Titolo Pubblico", value="Il Respiro tra Tradizione e Scienza")
-        contenuto_edit = st.text_area("Contenuto del Blog", height=500, value="Scrivi qui il tuo articolo...")
+        contenuto_edit = st.text_area("Contenuto del Blog", height=500, placeholder="Scrivi qui il tuo articolo...")
         if st.button("Aggiorna Blog"):
-            st.toast("Articolo Pubblicato!")
-            # Qui memorizziamo temporaneamente i dati
             st.session_state['titolo_pub'] = titolo_edit
             st.session_state['testo_pub'] = contenuto_edit
+            st.toast("Articolo Pubblicato!")
     
-    # VISTA PUBBLICA (Cosa vede la gente)
     t = st.session_state.get('titolo_pub', "Benvenuti su Sorgente Yoga")
-    c = st.session_state.get('testo_pub', "Inizia la tua esplorazione attraverso la sidebar delle risorse.")
+    c = st.session_state.get('testo_pub', "Esplora i contenuti attraverso i link di ricerca a destra.")
     
     st.markdown(f"<div class='article-title'>{t}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='article-meta'>Ricerca e testi di Luca Valenti</div>", unsafe_allow_html=True)
@@ -95,32 +90,33 @@ with col_main:
 
 with col_nav:
     st.markdown("### 🏛️ BIBLIOTECA DIGITALE")
-    st.write("Seleziona una categoria per approfondire")
     
-    # CATEGORIA: STORIA
+    # SEZIONE STORIA (Aggiornata con HYP e JoYS)
     with st.expander("📜 STORIA E TESTI ANTICHI", expanded=True):
         st.markdown("""
         <div class='resource-card'>
-            <a href='https://journalofyogastudies.org/index.php/JoYS/issue/archive' target='_blank' style='text-decoration:none; color:#1A2E44; font-weight:bold;'>Journal of Yoga Studies ↗</a><br>
-            <small>Ricerca accademica internazionale</small>
+            <a href='http://hyp.soas.ac.uk/' target='_blank' style='text-decoration:none; color:#1A2E44; font-weight:bold;'>Hatha Yoga Project (SOAS) ↗</a><br>
+            <small>Ricerca filologica sui manoscritti</small>
         </div>
         <div class='resource-card'>
-            <a href='https://www.kym.org/' target='_blank' style='text-decoration:none; color:#1A2E44; font-weight:bold;'>Krishnamacharya Yoga Mandiram ↗</a><br>
-            <small>Tradizione vivente e Viniyoga</small>
+            <a href='https://journalofyogastudies.org/index.php/JoYS/issue/archive' target='_blank' style='text-decoration:none; color:#1A2E44; font-weight:bold;'>Journal of Yoga Studies ↗</a><br>
+            <small>Rivista accademica internazionale</small>
         </div>
         """, unsafe_allow_html=True)
 
-    # CATEGORIA: SCIENZA
+    # SEZIONE SCIENZA (Raggruppata per ora)
     with st.expander("🔬 STUDI SCIENTIFICI", expanded=True):
         st.markdown("""
         <div class='resource-card'>
-            <a href='https://sleep.hms.harvard.edu/faculty-staff/sat-bir-singh-khalsa' target='_blank' style='text-decoration:none; color:#1A2E44; font-weight:bold;'>Harvard Medical School ↗</a><br>
-            <small>Laboratorio del Dr. Sat Bir Khalsa</small>
+            <a href='https://sleep.hms.harvard.edu/faculty-staff/sat-bir-singh-khalsa' target='_blank' style='text-decoration:none; color:#1A2E44; font-weight:bold;'>Harvard (Dr. Khalsa) ↗</a><br>
+            <small>Scienza del sonno e yoga</small>
         </div>
         <div class='resource-card'>
             <a href='https://www.iayt.org/' target='_blank' style='text-decoration:none; color:#1A2E44; font-weight:bold;'>IAYT Yoga Therapy ↗</a><br>
-            <small>Protocolli clinici e ricerca</small>
+            <small>Ricerca clinica e professionale</small>
+        </div>
+        <div class='resource-card'>
+            <a href='https://www.kym.org/' target='_blank' style='text-decoration:none; color:#1A2E44; font-weight:bold;'>KYM Tradition ↗</a><br>
+            <small>Lignaggio e pratica terapeutica</small>
         </div>
         """, unsafe_allow_html=True)
-        
-    st.info("💡 Nuovi tasti e siti verranno aggiunti man mano alla tua biblioteca digitale.")
