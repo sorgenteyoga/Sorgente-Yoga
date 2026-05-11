@@ -51,7 +51,7 @@ st.markdown(f"""
     /* Header Container con sfondo bianco */
     .header-container {{ 
         width: 100%; 
-        background-color: white; 
+        background-color: #FDFCF0
         border-bottom: 3px solid #C5A059; 
         margin-bottom: 25px; 
     }}
@@ -64,7 +64,7 @@ st.markdown(f"""
         background-size: contain; /* MOSTRA L'IMMAGINE INTERA */
         background-repeat: no-repeat;
         background-position: center; 
-        background-color: white;
+        background-color:#FDFCF0
         
         /* AGGIUNTO PADDING INTERNO: crea spazio bianco intorno all'immagine */
         /* così i margini non appariranno mai tagliati */
