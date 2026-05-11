@@ -117,9 +117,14 @@ with col_main:
             st.session_state['admin'] = False
             st.rerun()
 
-# --- VISUALIZZAZIONE ARTICOLO (VERSIONE DEFINITIVA "COPIA FEDELE") ---
+# --- VISUALIZZAZIONE ARTICOLO (VERSIONE "BLOCCO TOTALE") ---
     art = st.session_state['articolo_selezionato'] if st.session_state['articolo_selezionato'] else (tutti_gli_articoli[0] if tutti_gli_articoli else None)
+    
     if art:
+        # Trasformiamo il testo in una stringa sicura per l'HTML
+        # Questo garantisce che ogni "a capo" diventi un comando visibile al browser
+        testo_visualizzato = art['testo'].replace('\n', '<br>')
+
         st.markdown(f"""
         <div class="article-box">
             <h1 style='font-family:serif; color:#1A2E44; margin-top:0; margin-bottom:10px;'>{art['titolo']}</h1>
@@ -129,12 +134,10 @@ with col_main:
                 font-size: 1.3rem; 
                 line-height: 1.8; 
                 color: #1A2E44;
-                white-space: pre-wrap;       /* Forza il rispetto degli a capo */
-                white-space: -moz-pre-wrap;  /* Per Firefox */
-                white-space: -pre-wrap;      /* Per browser vecchi */
-                white-space: -o-pre-wrap;    /* Per Opera */
-                word-wrap: break-word;       /* Spezza le parole lunghe se necessario */
-            ">{art['testo']}</div>
+                display: block;
+            ">
+                {testo_visualizzato}
+            </div>
         </div>
         """, unsafe_allow_html=True)
     else:
