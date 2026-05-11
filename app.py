@@ -4,77 +4,108 @@ from Bio import Entrez
 # --- CONFIGURAZIONE ---
 st.set_page_config(page_title="SORGENTE YOGA", layout="wide", page_icon="🧘")
 
-# --- DESIGN AVANZATO ---
+# --- DESIGN AVANZATO (Layout a due colonne: Scrittura e Consultazione) ---
 st.markdown("""
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
     <style>
     .stApp { background-color: #FDFCF0; }
     h1, h2, h3 { font-family: 'Playfair Display', serif !important; color: #1A2E44 !important; }
     p, li, div, span { font-family: 'Lato', sans-serif !important; color: #4A3E3E; }
-    .card {
+    
+    /* Area di scrittura centrale */
+    .editor-container {
         background-color: #ffffff;
-        padding: 25px;
-        border-radius: 15px;
-        border-left: 5px solid #C5A059;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        margin-bottom: 20px;
+        padding: 40px;
+        border-radius: 5px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        min-height: 800px;
+        border-top: 4px solid #1A2E44;
     }
+    
+    /* Box strumenti laterali */
+    .tool-card {
+        background-color: #ffffff;
+        padding: 15px;
+        border-radius: 10px;
+        border-left: 4px solid #C5A059;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
     .stButton>button {
         background-color: #1A2E44 !important;
         color: #FDFCF0 !important;
-        border-radius: 20px !important;
-        border: none !important;
-        padding: 10px 25px !important;
+        border-radius: 5px !important;
+        font-size: 0.8rem !important;
     }
-    [data-testid="stSidebar"] { background-color: #1A2E44 !important; }
-    [data-testid="stSidebar"] * { color: #FDFCF0 !important; }
+    
     #MainMenu, footer, header {visibility: hidden;}
     </style>
     """, unsafe_allow_html=True)
 
-# --- SIDEBAR ---
-with st.sidebar:
-    st.markdown("<h2 style='text-align: center;'>🧘<br>SORGENTE YOGA</h2>", unsafe_allow_html=True)
-    st.write("---")
-    st.markdown("<p style='text-align: center; opacity: 0.8;'>Ricerca e cura di</p>", unsafe_allow_html=True)
-    st.markdown("<h3 style='text-align: center; color: #C5A059 !important;'>Luca Valenti</h3>", unsafe_allow_html=True)
+# --- FUNZIONI TECNICHE ---
+def cerca_pubmed(query):
+    Entrez.email = "tua_email@esempio.com"
+    try:
+        handle = Entrez.esearch(db="pubmed", term=query, retmax=3)
+        record = Entrez.read(handle)
+        results = []
+        for id in record["IdList"]:
+            h = Entrez.esummary(db="pubmed", id=id)
+            r = Entrez.read(h)
+            results.append({"titolo": r[0]['Title'], "link": f"https://pubmed.ncbi.nlm.nih.gov/{id}/"})
+        return results
+    except: return []
 
-# --- INTESTAZIONE ---
-st.markdown("<h1 style='text-align: center; font-size: 3rem;'>SORGENTE YOGA</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; font-style: italic; font-size: 1.2rem;'>L'unione tra il rigore dei manoscritti e l'evidenza della scienza.</p>", unsafe_allow_html=True)
-st.write("<br>", unsafe_allow_html=True)
+# --- LAYOUT A COLONNE ---
+# Colonna sinistra (Scrittura: 65%) | Colonna destra (Consultazione: 35%)
+col_main, col_tools = st.columns([0.65, 0.35], gap="large")
 
-# --- CONTENUTO ---
-tab1, tab2, tab3 = st.tabs(["📜 TRADIZIONE", "🔬 SCIENZA", "🏥 TERAPIA"])
+with col_main:
+    st.markdown("<h1>SORGENTE YOGA</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='font-style: italic;'>Editoriale di Luca Valenti</p>", unsafe_allow_html=True)
+    
+    # Spazio per scrivere l'articolo principale
+    st.markdown("<div class='editor-container'>", unsafe_allow_html=True)
+    titolo_articolo = st.text_input("Titolo del tuo articolo", "Inserisci il titolo qui...")
+    contenuto_articolo = st.text_area("Inizia a scrivere la tua ricerca...", height=600, placeholder="Oggi la pratica di asana incontra la fisiologia del nervo vago...")
+    
+    if st.button("Salva Bozza"):
+        st.success("Articolo salvato localmente!")
+    st.markdown("</div>", unsafe_allow_html=True)
 
-with tab1:
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("""<div class='card'>
-            <h3>Journal of Yoga Studies</h3>
-            <p>Esplora l'eccellenza della ricerca indologica. Studi peer-reviewed sui testi sanscriti.</p>
-            <a href='https://journalofyogastudies.org/index.php/JoYS/issue/archive' target='_blank' style='color:#C5A059; text-decoration:none; font-weight:bold;'>Vai all'Archivio →</a>
+with col_tools:
+    st.markdown("### 📚 Strumenti di Ricerca")
+    
+    # Sezione Tradizione
+    with st.expander("📜 TRADIZIONE & TESTI", expanded=True):
+        st.markdown("""<div class='tool-card'>
+            <small><b>Journal of Yoga Studies</b></small><br>
+            <a href='https://journalofyogastudies.org/index.php/JoYS/issue/archive' target='_blank' style='color:#C5A059; font-size:0.9rem;'>Archivio JoYS →</a>
         </div>""", unsafe_allow_html=True)
-    with col2:
-        st.markdown("""<div class='card'>
-            <h3>KYM Tradition</h3>
-            <p>Insegnamenti di T. Krishnamacharya. Risorse su Viniyoga e pranayama tradizionale.</p>
-            <a href='https://www.kym.org/' target='_blank' style='color:#C5A059; text-decoration:none; font-weight:bold;'>Visita il Portale →</a>
+        st.markdown("""<div class='tool-card'>
+            <small><b>KYM Tradition</b></small><br>
+            <a href='https://www.kym.org/' target='_blank' style='color:#C5A059; font-size:0.9rem;'>Portale KYM →</a>
         </div>""", unsafe_allow_html=True)
 
-with tab2:
-    st.markdown("<div class='card'><h3>Osservatorio Scientifico</h3><p>Monitoraggio database medici mondiali.</p></div>", unsafe_allow_html=True)
-    c1, c2 = st.columns(2)
-    with c1:
-        if st.button("🔍 Studi Dr. Sat Bir Khalsa"):
-            st.info("Ricerca in corso...")
-    with c2:
-        if st.button("🧬 HRV & Sistema Nervoso"):
-            st.info("Interrogando PubMed...")
+    # Sezione Scienza
+    with st.expander("🔬 SCIENZA & HARVARD", expanded=True):
+        if st.button("🔍 Studi Sat Bir Khalsa"):
+            articoli = cerca_pubmed("Sat Bir Singh Khalsa")
+            for art in articoli:
+                st.markdown(f"<small style='color:#1A2E44;'>• {art['titolo']}</small>", unsafe_allow_html=True)
+        
+        if st.button("🧬 HRV & Neuroscienze"):
+            articoli = cerca_pubmed("yoga heart rate variability")
+            for art in articoli:
+                st.markdown(f"<small style='color:#1A2E44;'>• {art['titolo']}</small>", unsafe_allow_html=True)
 
-with tab3:
-    st.markdown("""<div class='card'>
-        <h3>IAYT Resources</h3>
-        <p>Standard internazionali per lo Yoga Therapy clinico.</p>
-        <a href='https://www.iayt.org/' target='_blank' style='color:#C5A059; text-decoration:none; font-weight:bold;'>Accedi al Database →</a>
-    </div>""", unsafe_allow_html=True)
+    # Sezione Immagini
+    with st.expander("🖼️ ARCHIVIO VISIVO", expanded=False):
+        uploaded_file = st.file_uploader("Carica riferimento visivo", type=["jpg","png"])
+        if uploaded_file:
+            st.image(uploaded_file, use_container_width=True)
+
+    # Sezione Terapia
+    with st.expander("🏥 TERAPIA CLINICA", expanded=False):
+        st.link_button("Database IAYT", "https://www.iayt.org/")
