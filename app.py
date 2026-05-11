@@ -13,7 +13,7 @@ def get_base64_image(image_path):
     return None
 
 # CAMBIA IL NOME QUI SOTTO SE LA TUA IMMAGINE SI CHIAMA DIVERSAMENTE
-img_base64 = get_base64_image("header_yoga.jpg")
+img_base64 = get_base64_image("header_yoga.png")
 
 # --- DESIGN ---
 st.markdown(f"""
