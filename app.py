@@ -117,12 +117,9 @@ with col_main:
             st.session_state['admin'] = False
             st.rerun()
 
-# --- VISUALIZZAZIONE ARTICOLO (VERSIONE DEFINITIVA PER FORMATTAZIONE) ---
+# --- VISUALIZZAZIONE ARTICOLO (VERSIONE DEFINITIVA "COPIA FEDELE") ---
     art = st.session_state['articolo_selezionato'] if st.session_state['articolo_selezionato'] else (tutti_gli_articoli[0] if tutti_gli_articoli else None)
     if art:
-        # Pre-processiamo il testo per convertire i link HTML prima della visualizzazione
-        testo_formattato = art['testo']
-        
         st.markdown(f"""
         <div class="article-box">
             <h1 style='font-family:serif; color:#1A2E44; margin-top:0; margin-bottom:10px;'>{art['titolo']}</h1>
@@ -131,11 +128,13 @@ with col_main:
                 font-family: 'serif'; 
                 font-size: 1.3rem; 
                 line-height: 1.8; 
-                white-space: pre-wrap !important; 
-                word-wrap: break-word;
-                display: block;
                 color: #1A2E44;
-            ">{testo_formattato}</div>
+                white-space: pre-wrap;       /* Forza il rispetto degli a capo */
+                white-space: -moz-pre-wrap;  /* Per Firefox */
+                white-space: -pre-wrap;      /* Per browser vecchi */
+                white-space: -o-pre-wrap;    /* Per Opera */
+                word-wrap: break-word;       /* Spezza le parole lunghe se necessario */
+            ">{art['testo']}</div>
         </div>
         """, unsafe_allow_html=True)
     else:
