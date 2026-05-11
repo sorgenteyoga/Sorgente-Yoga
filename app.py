@@ -46,6 +46,7 @@ st.markdown(f"""
     .icon-title-container {{ display: flex; align-items: center; gap: 12px; margin-top: 25px; margin-bottom: 10px; }}
     .icon-img {{ width: 35px; height: 35px; object-fit: contain; }}
     .icon-text {{ font-weight: bold; color: #1A2E44; font-family: 'serif'; font-size: 1.1rem; }}
+    .resource-link {{ text-decoration: none; color: #1A2E44 !important; font-weight: bold; display: block; padding: 8px 0; border-bottom: 1px solid #eee; }}
     #MainMenu, footer, header {{visibility: hidden;}}
     </style>
     <div class="header-container">
@@ -62,6 +63,7 @@ tutti_gli_articoli = carica_articoli()
 col_main, col_nav = st.columns([0.7, 0.3], gap="large")
 
 with col_main:
+    # --- ACCESSO ---
     if not st.session_state['admin']:
         with st.expander("🔑 Area Autore"):
             pwd = st.text_input("Password", type="password")
@@ -69,10 +71,10 @@ with col_main:
                 st.session_state['admin'] = True
                 st.rerun()
     
+    # --- AREA EDITORIALE ---
     if st.session_state['admin']:
         st.info("✍️ MODALITÀ EDITORE")
         
-        # TAB 1: SCRITTURA
         with st.expander("📝 SCRIVI NUOVO ARTICOLO", expanded=True):
             tit_n = st.text_input("Titolo")
             tes_n = st.text_area("Testo", height=250)
@@ -82,7 +84,6 @@ with col_main:
                     st.success("Articolo pubblicato!")
                     st.rerun()
 
-        # TAB 2: ELIMINAZIONE SINGOLA
         with st.expander("🗑️ GESTIONE ARCHIVIO (Elimina Singoli)"):
             if tutti_gli_articoli:
                 for idx, a in enumerate(tutti_gli_articoli):
@@ -100,7 +101,7 @@ with col_main:
             st.session_state['admin'] = False
             st.rerun()
 
-    # Visualizzazione Articolo Selezionato o Ultimo
+    # --- VISUALIZZAZIONE ARTICOLO ---
     art = st.session_state['articolo_selezionato'] if st.session_state['articolo_selezionato'] else (tutti_gli_articoli[0] if tutti_gli_articoli else None)
     if art:
         st.markdown(f"""
@@ -111,12 +112,12 @@ with col_main:
         </div>
         """, unsafe_allow_html=True)
     else:
-        st.write("L'archivio è vuoto. Accedi per pubblicare il tuo primo studio.")
+        st.write("Benvenuti su Sorgente Yoga. Accedi per pubblicare il tuo primo studio.")
 
 with col_nav:
     st.markdown("### 🏛️ BIBLIOTECA")
     
-    # Archivio Blog
+    # 1. ARCHIVIO BLOG
     st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_archivio}" class="icon-img"><span class="icon-text">ARCHIVIO BLOG</span></div>', unsafe_allow_html=True)
     with st.expander("Sfoglia articoli", expanded=True):
         if tutti_gli_articoli:
@@ -127,8 +128,23 @@ with col_nav:
         else:
             st.caption("Vuoto.")
 
-    # Sezioni statiche (Testi, Storia, Scienza)
+    # 2. TESTI CLASSICI
     st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_testi}" class="icon-img"><span class="icon-text">TESTI CLASSICI</span></div>', unsafe_allow_html=True)
     with st.expander("Elenco testi"):
-        st.write("• Yoga Sūtra")
+        st.write("• Yoga Sūtra (Patañjali)")
         st.write("• Haṭha Yoga Pradīpikā")
+        st.write("• Gheraṇḍa Saṃhitā")
+        st.write("• Bhagavad Gītā")
+
+    # 3. RICERCA STORICA
+    st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_storia}" class="icon-img"><span class="icon-text">RICERCA STORICA</span></div>', unsafe_allow_html=True)
+    with st.expander("Siti e Progetti"):
+        st.markdown('<a class="resource-link" href="http://hyp.soas.ac.uk/" target="_blank">Hatha Yoga Project ↗</a>', unsafe_allow_html=True)
+        st.markdown('<a class="resource-link" href="https://journalofyogastudies.org/index.php/JoYS/issue/archive" target="_blank">Journal of Yoga Studies ↗</a>', unsafe_allow_html=True)
+
+    # 4. SCIENZA
+    st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_scienza}" class="icon-img"><span class="icon-text">SCIENZA</span></div>', unsafe_allow_html=True)
+    with st.expander("Istituti e Ricerche"):
+        st.markdown('<a class="resource-link" href="https://sleep.hms.harvard.edu/faculty-staff/sat-bir-singh-khalsa" target="_blank">Harvard (Dr. Khalsa) ↗</a>', unsafe_allow_html=True)
+        st.markdown('<a class="resource-link" href="https://www.iayt.org/" target="_blank">IAYT Yoga Therapy ↗</a>', unsafe_allow_html=True)
+        st.markdown('<a class="resource-link" href="https://www.kym.org/" target="_blank">KYM Tradition ↗</a>', unsafe_allow_html=True)
