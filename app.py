@@ -117,7 +117,7 @@ with col_main:
             st.session_state['admin'] = False
             st.rerun()
 
-  # --- VISUALIZZAZIONE ARTICOLO (VERSIONE DEFINITIVA PER FORMATTAZIONE) ---
+# --- VISUALIZZAZIONE ARTICOLO (VERSIONE DEFINITIVA PER FORMATTAZIONE) ---
     art = st.session_state['articolo_selezionato'] if st.session_state['articolo_selezionato'] else (tutti_gli_articoli[0] if tutti_gli_articoli else None)
     if art:
         # Pre-processiamo il testo per convertire i link HTML prima della visualizzazione
