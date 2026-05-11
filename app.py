@@ -19,18 +19,16 @@ def carica_articoli():
             return json.load(f)
     return []
 
-def salva_articolo(nuovo):
-    articoli = carica_articoli()
-    articoli.insert(0, nuovo)
+def salva_tutti_articoli(articoli):
     with open("archivio_articoli.json", "w", encoding="utf-8") as f:
         json.dump(articoli, f, ensure_ascii=False, indent=4)
 
-def svuota_archivio():
-    if os.path.exists("archivio_articoli.json"):
-        os.remove("archivio_articoli.json")
-    st.session_state['articolo_selezionato'] = None
+def aggiungi_articolo(nuovo):
+    articoli = carica_articoli()
+    articoli.insert(0, nuovo)
+    salva_tutti_articoli(articoli)
 
-# Caricamento risorse
+# --- CARICAMENTO RISORSE ---
 img_header = get_base64_image("header_yoga.png")
 icon_archivio = get_base64_image("icona_archivio.png")
 icon_testi = get_base64_image("icona_testi.png")
@@ -72,27 +70,37 @@ with col_main:
                 st.rerun()
     
     if st.session_state['admin']:
-        st.info("✍️ MODALITÀ EDITORE ATTIVA")
-        tit_n = st.text_input("Titolo nuovo articolo")
-        tes_n = st.text_area("Testo articolo", height=300)
+        st.info("✍️ MODALITÀ EDITORE")
         
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            if st.button("🚀 Pubblica"):
+        # TAB 1: SCRITTURA
+        with st.expander("📝 SCRIVI NUOVO ARTICOLO", expanded=True):
+            tit_n = st.text_input("Titolo")
+            tes_n = st.text_area("Testo", height=250)
+            if st.button("🚀 Pubblica Articolo"):
                 if tit_n and tes_n:
-                    salva_articolo({"data": datetime.now().strftime("%d/%m/%Y"), "titolo": tit_n, "testo": tes_n})
+                    aggiungi_articolo({"data": datetime.now().strftime("%d/%m/%Y"), "titolo": tit_n, "testo": tes_n})
+                    st.success("Articolo pubblicato!")
                     st.rerun()
-        with c2:
-            if st.button("🗑️ Svuota Archivio"):
-                svuota_archivio()
-                st.warning("Archivio cancellato!")
-                st.rerun()
-        with c3:
-            if st.button("🔒 Esci"):
-                st.session_state['admin'] = False
-                st.rerun()
 
-    # Visualizzazione
+        # TAB 2: ELIMINAZIONE SINGOLA
+        with st.expander("🗑️ GESTIONE ARCHIVIO (Elimina Singoli)"):
+            if tutti_gli_articoli:
+                for idx, a in enumerate(tutti_gli_articoli):
+                    c_tit, c_del = st.columns([0.8, 0.2])
+                    c_tit.write(f"**{a['titolo']}** ({a['data']})")
+                    if c_del.button("Elimina", key=f"del_{idx}"):
+                        nuova_lista = [art for i, art in enumerate(tutti_gli_articoli) if i != idx]
+                        salva_tutti_articoli(nuova_lista)
+                        st.session_state['articolo_selezionato'] = None
+                        st.rerun()
+            else:
+                st.write("Nessun articolo da eliminare.")
+
+        if st.button("🔒 Esci dalla modalità editore"):
+            st.session_state['admin'] = False
+            st.rerun()
+
+    # Visualizzazione Articolo Selezionato o Ultimo
     art = st.session_state['articolo_selezionato'] if st.session_state['articolo_selezionato'] else (tutti_gli_articoli[0] if tutti_gli_articoli else None)
     if art:
         st.markdown(f"""
@@ -103,22 +111,24 @@ with col_main:
         </div>
         """, unsafe_allow_html=True)
     else:
-        st.write("Nessun articolo presente. Accedi per scrivere il primo.")
+        st.write("L'archivio è vuoto. Accedi per pubblicare il tuo primo studio.")
 
 with col_nav:
     st.markdown("### 🏛️ BIBLIOTECA")
     
-    # Archivio
+    # Archivio Blog
     st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_archivio}" class="icon-img"><span class="icon-text">ARCHIVIO BLOG</span></div>', unsafe_allow_html=True)
     with st.expander("Sfoglia articoli", expanded=True):
         if tutti_gli_articoli:
             for i, a in enumerate(tutti_gli_articoli):
-                if st.button(f"📄 {a['titolo']}", key=f"btn_{i}"):
+                if st.button(f"📄 {a['titolo']}", key=f"nav_{i}"):
                     st.session_state['articolo_selezionato'] = a
                     st.rerun()
-        else: st.write("Vuoto.")
+        else:
+            st.caption("Vuoto.")
 
-    # Altre sezioni...
+    # Sezioni statiche (Testi, Storia, Scienza)
     st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_testi}" class="icon-img"><span class="icon-text">TESTI CLASSICI</span></div>', unsafe_allow_html=True)
     with st.expander("Elenco testi"):
         st.write("• Yoga Sūtra")
+        st.write("• Haṭha Yoga Pradīpikā")
