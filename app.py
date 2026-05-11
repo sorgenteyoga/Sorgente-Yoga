@@ -130,9 +130,10 @@ with col_main:
         <div class="article-box">
             <h1 style='font-family:serif; color:#1A2E44; margin-top:0;'>{art['titolo']}</h1>
             <p style='font-style:italic; color:#C5A059;'>{art['data']} • Luca Valenti</p>
-            <div style='font-family:serif; font-size:1.3rem; line-height:1.8; white-space: pre-wrap; word-wrap: break-word;'>
-    {art['testo']}
-</div>
+            <div style="font-family:serif; font-size:1.3rem; line-height:1.8; white-space: pre-wrap !important; word-wrap: break-word; display: block;">
+                {art['testo']}
+            </div>
+        </div>
         """, unsafe_allow_html=True)
 
 with col_nav:
