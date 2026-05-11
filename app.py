@@ -12,14 +12,19 @@ def get_base64_image(image_path):
             return base64.b64encode(img_file.read()).decode()
     return None
 
-# CAMBIA IL NOME QUI SOTTO SE LA TUA IMMAGINE SI CHIAMA DIVERSAMENTE
-img_base64 = get_base64_image("header_yoga.png")
+img_base64 = get_base64_image("header_yoga.jpg")
 
 # --- DESIGN ---
 st.markdown(f"""
     <style>
     .stApp {{ background-color: #FDFCF0; }}
     
+    /* Forza visibilità Sidebar */
+    [data-testid="stSidebar"] {{
+        background-color: #f0ede0 !important;
+        border-right: 1px solid #C5A059;
+    }}
+
     /* Header con Immagine */
     .header-container {{
         width: 100%;
@@ -46,14 +51,12 @@ st.markdown(f"""
         text-align: center;
     }}
     
-    /* Box Articolo */
     .article-content {{ 
         font-family: 'serif'; font-size: 1.3rem; line-height: 1.8; color: #2D2D2D;
         background: white; padding: 40px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }}
 
-    /* Stile per i link nei sottomenù */
-    .resource-link {{ text-decoration: none; color: #1A2E44; font-weight: bold; display: block; padding: 5px 0; }}
+    .resource-link {{ text-decoration: none; color: #1A2E44; font-weight: bold; display: block; padding: 8px 0; }}
     
     #MainMenu, footer, header {{visibility: hidden;}}
     </style>
@@ -64,9 +67,9 @@ st.markdown(f"""
     </div>
     """, unsafe_allow_html=True)
 
-# --- SIDEBAR (Accesso Autore) ---
+# --- SIDEBAR (Barra a Sinistra) ---
 with st.sidebar:
-    st.markdown("### 🔒 AREA AUTORE")
+    st.markdown("<h2 style='color:#1A2E44;'>🔑 ACCESSO</h2>", unsafe_allow_html=True)
     password = st.text_input("Inserisci password per scrivere", type="password")
     
     if password == "sorgente2026":
@@ -74,32 +77,32 @@ with st.sidebar:
         st.success("Modalità Scrittura Attiva")
     else:
         st.session_state['admin'] = False
+    
+    st.write("---")
+    st.caption("Gestione contenuti riservata a Luca Valenti")
 
 # --- LAYOUT PRINCIPALE ---
 col_main, col_nav = st.columns([0.7, 0.3], gap="large")
 
 with col_main:
-    # AREA DI SCRITTURA (Appare solo con password)
     if st.session_state.get('admin'):
-        st.markdown("### ✍️ Crea il tuo Articolo")
+        st.markdown("### ✍️ Area Editoriale")
         titolo_input = st.text_input("Titolo dell'articolo", value=st.session_state.get('titolo_pub', ""))
         testo_input = st.text_area("Testo dell'articolo", height=400, value=st.session_state.get('testo_pub', ""))
-        if st.button("Pubblica Online"):
+        if st.button("Pubblica Ora"):
             st.session_state['titolo_pub'] = titolo_input
             st.session_state['testo_pub'] = testo_input
-            st.balloons()
+            st.toast("Articolo aggiornato con successo!")
 
-    # VISUALIZZAZIONE PUBBLICA
-    titolo_finale = st.session_state.get('titolo_pub', "Benvenuti su Sorgente Yoga")
-    testo_finale = st.session_state.get('testo_pub', "Effettua l'accesso nella barra a sinistra per pubblicare il tuo primo contenuto.")
+    t_finale = st.session_state.get('titolo_pub', "Benvenuti su Sorgente Yoga")
+    c_finale = st.session_state.get('testo_pub', "Esegui il login nella barra laterale per inserire i tuoi studi.")
     
-    st.markdown(f"<h1 style='color:#1A2E44;'>{titolo_finale}</h1>", unsafe_allow_html=True)
-    st.markdown(f"<div class='article-content'>{testo_finale}</div>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='color:#1A2E44;'>{t_finale}</h1>", unsafe_allow_html=True)
+    st.markdown(f"<div class='article-content'>{c_finale}</div>", unsafe_allow_html=True)
 
 with col_nav:
-    st.markdown("### 🏛️ RISORSE")
+    st.markdown("### 🏛️ BIBLIOTECA")
 
-    # SOTTOMENU A SCOMPARSA
     with st.expander("📜 STORIA E TESTI ANTICHI"):
         st.markdown("<a class='resource-link' href='http://hyp.soas.ac.uk/' target='_blank'>Hatha Yoga Project ↗</a>", unsafe_allow_html=True)
         st.markdown("<a class='resource-link' href='https://journalofyogastudies.org/index.php/JoYS/issue/archive' target='_blank'>Journal of Yoga Studies ↗</a>", unsafe_allow_html=True)
