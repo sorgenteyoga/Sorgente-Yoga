@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 
 # --- CONFIGURAZIONE PAGINA ---
-st.set_page_config(page_title="SORGENTE YOGA", layout="wide", page_icon="🧘")
+st.set_page_config(page_title="SORGENTE YOGA per secchioni", layout="wide", page_icon="🧘")
 
 # --- FUNZIONI DI SERVIZIO ---
 def get_base64_image(image_path):
