@@ -18,33 +18,24 @@ def save_a(arts):
     with open("archivio_articoli.json", "w", encoding="utf-8") as f: json.dump(arts, f, ensure_ascii=False, indent=4)
 
 ih = get_img("header_yoga.png")
-ib = get_img("banner_nav.png") # La tua nuova immagine più larga
 
 st.markdown(f"""<style>
 .stApp {{ background:#FDFCF0; }}
 .block-container {{ padding: 1rem 5% !important; }}
 .header-img {{ width:100%; height:100px; background:url('data:image/png;base64,{ih}') no-repeat center; background-size:contain; border-bottom:3px solid #C5A059; }}
-.header-bar {{ background:#1A2E44; padding:8px; color:#FDFCF0; font-family:serif; text-align:center; letter-spacing:2px; font-size:1.2rem; }}
+.header-bar {{ background:#1A2E44; padding:8px; color:#FDFCF0; font-family:serif; text-align:center; letter-spacing:2px; font-size:1.2rem; margin-bottom:15px; }}
 
-/* Nuova fascia Navigazione con Immagine Larga */
-.nav-wrapper {{ 
-    background: url('data:image/png;base64,{ib}') no-repeat center; 
-    background-size: cover; 
-    padding: 25px 15px; 
-    border-bottom: 2px solid #C5A059;
-    margin-bottom: 30px;
-}}
-
-.art-box {{ background:white; padding:40px; border-radius:5px; box-shadow:0 2px 12px rgba(0,0,0,0.06); color:#1A2E44; min-height:600px; }}
+.art-box {{ background:white; padding:40px; border-radius:5px; box-shadow:0 2px 12px rgba(0,0,0,0.06); color:#1A2E44; min-height:600px; margin-top:10px; }}
 #MainMenu, footer, header {{ visibility:hidden; }}
 
-/* Stile bottoni personalizzati */
+/* Stile bottoni menu minimali */
 button[data-testid="stBaseButton-secondary"] {{
-    background-color: rgba(26, 46, 68, 0.85) !important;
+    background-color: #1A2E44 !important;
     color: #FDFCF0 !important;
     border: 1px solid #C5A059 !important;
     font-family: serif !important;
     font-weight: bold !important;
+    height: 45px;
 }}
 </style>
 <div class="header-img"></div><div class="header-bar">S O R G E N T E &nbsp; Y O G A</div>""", unsafe_allow_html=True)
@@ -56,8 +47,7 @@ all_a = load_a()
 b_a = [a for a in all_a if a.get('cat', 'BLOG') == 'BLOG']
 t_a = [a for a in all_a if a.get('cat') == 'TESTI']
 
-# --- BARRA DI NAVIGAZIONE CON IMMAGINE ---
-st.markdown('<div class="nav-wrapper">', unsafe_allow_html=True)
+# --- NAVIGAZIONE MINIMALE (Senza barre o riquadri) ---
 c_nav = st.columns([0.2, 0.2, 0.15, 0.15, 0.3])
 
 with c_nav[0]:
@@ -74,12 +64,11 @@ with c_nav[1]:
 
 with c_nav[2]:
     with st.popover("🏛️ STORIA", use_container_width=True):
-        st.markdown('<a href="http://hyp.soas.ac.uk/" target="_blank" style="text-decoration:none; color:#1A2E44; font-weight:bold;">Hatha Yoga Project ↗</a>', unsafe_allow_html=True)
+        st.markdown('<a href="http://hyp.soas.ac.uk/" target="_blank" style="text-decoration:none; color:#1A2E44; font-weight:bold; display:block; text-align:center; padding:10px; border:1px solid #eee;">Hatha Yoga Project ↗</a>', unsafe_allow_html=True)
 
 with c_nav[3]:
     with st.popover("🔬 SCIENZA", use_container_width=True):
-        st.markdown('<a href="https://www.iayt.org/" target="_blank" style="text-decoration:none; color:#1A2E44; font-weight:bold;">IAYT Yoga Therapy ↗</a>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('<a href="https://www.iayt.org/" target="_blank" style="text-decoration:none; color:#1A2E44; font-weight:bold; display:block; text-align:center; padding:10px; border:1px solid #eee;">IAYT Yoga Therapy ↗</a>', unsafe_allow_html=True)
 
 # --- CONTENUTO PRINCIPALE ---
 cur = st.session_state['sel'] if st.session_state['sel'] else (all_a[0] if all_a else None)
@@ -121,3 +110,4 @@ else:
                 if st.button("💾 Salva"): save_a(all_a); st.rerun()
                 if st.button("🗑️ Elimina"): all_a.pop(idx); save_a(all_a); st.rerun()
     if st.button("🔒 Esci"): st.session_state['adm'] = False; st.rerun()
+        
