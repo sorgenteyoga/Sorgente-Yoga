@@ -67,9 +67,11 @@ if 'articolo_selezionato' not in st.session_state: st.session_state['articolo_se
 
 tutti_gli_articoli = carica_articoli()
 
+# --- LAYOUT A COLONNE ---
 col_main, col_nav = st.columns([0.7, 0.3], gap="large")
 
 with col_main:
+    # AREA ACCESSO
     if not st.session_state['admin']:
         with st.expander("🔑 Area Autore"):
             pwd = st.text_input("Password", type="password")
@@ -77,13 +79,14 @@ with col_main:
                 st.session_state['admin'] = True
                 st.rerun()
     
+    # AREA EDITORE
     if st.session_state['admin']:
         st.info("✍️ MODALITÀ EDITORE")
         
         if tutti_gli_articoli:
             json_string = json.dumps(tutti_gli_articoli, ensure_ascii=False, indent=4)
             st.download_button(
-                label="📥 SCARICA COPIA DI SICUREZZA (Backup)",
+                label="📥 SCARICA BACKUP ARTICOLI",
                 data=json_string,
                 file_name=f"backup_yoga_{datetime.now().strftime('%d_%m_%Y')}.json",
                 mime="application/json",
@@ -125,21 +128,25 @@ with col_main:
             st.session_state['admin'] = False
             st.rerun()
 
-# --- VISUALIZZAZIONE ARTICOLO (FIX SINTASSI) ---
+    # VISUALIZZAZIONE ARTICOLO (FIXATA)
     art = st.session_state['articolo_selezionato'] if st.session_state['articolo_selezionato'] else (tutti_gli_articoli[0] if tutti_gli_articoli else None)
-    
     if art:
-        testo_visualizzato = art['testo'].replace('\n', '<br>')
-        # Costruiamo l'HTML separatamente per evitare errori con le f-strings
-        html_articolo = f"""
+        testo_html = art['testo'].replace('\n', '<br>')
+        st.markdown(f"""
         <div class="article-box">
             <h1 style='font-family:serif; color:#1A2E44; margin-top:0; margin-bottom:10px;'>{art['titolo']}</h1>
             <p style='font-style:italic; color:#C5A059; margin-bottom:30px;'>{art['data']} • Luca Valenti</p>
             <div style="font-family:serif; font-size:1.3rem; line-height:1.8; color:#1A2E44; display:block;">
-                {testo_visualizzato}
+                {testo_html}
             </div>
         </div>
-        """
-        st.markdown(html_articolo, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
     else:
         st.write("Benvenuti su Sorgente Yoga.")
+
+with col_nav:
+    st.markdown("### 🏛️ BIBLIOTECA")
+    
+    st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_archivio}" class="icon-img"><span class="icon-text">ARCHIVIO BLOG</span></div>', unsafe_allow_html=True)
+    with st.expander("Sfoglia articoli", expanded=True):
+        if tutti_gli_artic
