@@ -1,5 +1,5 @@
 # --- VISUALIZZAZIONE ARTICOLO ---
-    art = st.session_state['articolo_selezionato'] if st.session_state['articolo_selezionato'] else (tutti_gli_articoli[0] if tutti_gli_articoli else None)
+art = st.session_state['articolo_selezionato'] if st.session_state['articolo_selezionato'] else (tutti_gli_articoli[0] if tutti_gli_articoli else None)
     if art:
         testo_html = art['testo'].replace('\n', '<br>')
         st.markdown(f"""
