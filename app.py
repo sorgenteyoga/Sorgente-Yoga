@@ -69,6 +69,10 @@ if 'articolo_selezionato' not in st.session_state: st.session_state['articolo_se
 
 tutti_gli_articoli = carica_articoli()
 
+# Separazione logica degli articoli per categoria
+articoli_blog = [a for a in tutti_gli_articoli if a.get('categoria') == 'ARCHIVIO BLOG']
+articoli_antichi = [a for a in tutti_gli_articoli if a.get('categoria') == 'TESTI ANTICHI']
+
 col_main, col_nav = st.columns([0.7, 0.3], gap="large")
 
 with col_main:
@@ -85,51 +89,82 @@ with col_main:
             json_string = json.dumps(tutti_gli_articoli, ensure_ascii=False, indent=4)
             st.download_button(label="📥 SCARICA BACKUP", data=json_string, file_name=f"backup_yoga_{datetime.now().strftime('%d_%m_%Y')}.json", mime="application/json")
             st.divider()
-        with st.expander("📝 NUOVO ARTICOLO"):
+        
+        with st.expander("📝 SCRIVI NUOVO ARTICOLO"):
+            cat_n = st.radio("Dove vuoi pubblicare?", ["ARCHIVIO BLOG", "TESTI ANTICHI"])
             tit_n = st.text_input("Titolo")
             tes_n = st.text_area("Testo", height=250)
             if st.button("🚀 Pubblica"):
                 if tit_n and tes_n:
-                    aggiungi_articolo({"data": datetime.now().strftime("%d/%m/%Y"), "titolo": tit_n, "testo": tes_n})
+                    aggiungi_articolo({
+                        "data": datetime.now().strftime("%d/%m/%Y"), 
+                        "titolo": tit_n, 
+                        "testo": tes_n,
+                        "categoria": cat_n
+                    })
                     st.rerun()
-        with st.expander("✏️ MODIFICA"):
+
+        with st.expander("✏️ MODIFICA / ELIMINA"):
             if tutti_gli_articoli:
                 nomi = [a['titolo'] for a in tutti_gli_articoli]
-                scelta = st.selectbox("Seleziona", nomi)
+                scelta = st.selectbox("Seleziona articolo", nomi)
                 idx = nomi.index(scelta)
-                edit_tit = st.text_input("Titolo attuale", tutti_gli_articoli[idx]['titolo'])
-                edit_tes = st.text_area("Testo attuale", tutti_gli_articoli[idx]['testo'], height=300)
-                if st.button("💾 Salva"):
+                edit_cat = st.radio("Categoria", ["ARCHIVIO BLOG", "TESTI ANTICHI"], index=0 if tutti_gli_articoli[idx].get('categoria') == "ARCHIVIO BLOG" else 1)
+                edit_tit = st.text_input("Modifica Titolo", tutti_gli_articoli[idx]['titolo'])
+                edit_tes = st.text_area("Modifica Testo", tutti_gli_articoli[idx]['testo'], height=300)
+                
+                c1, c2 = st.columns(2)
+                if c1.button("💾 Salva Modifiche"):
                     tutti_gli_articoli[idx]['titolo'] = edit_tit
                     tutti_gli_articoli[idx]['testo'] = edit_tes
+                    tutti_gli_articoli[idx]['categoria'] = edit_cat
                     salva_tutti_articoli(tutti_gli_articoli)
                     st.rerun()
+                if c2.button("🗑️ Elimina Articolo"):
+                    tutti_gli_articoli.pop(idx)
+                    salva_tutti_articoli(tutti_gli_articoli)
+                    st.rerun()
+
         if st.button("🔒 Esci"):
             st.session_state['admin'] = False
             st.rerun()
 
+    # VISUALIZZAZIONE ARTICOLO
     art = st.session_state['articolo_selezionato'] if st.session_state['articolo_selezionato'] else (tutti_gli_articoli[0] if tutti_gli_articoli else None)
     if art:
         testo_html = art['testo'].replace('\n', '<br>')
-        st.markdown(f'<div class="article-box"><h1 style="font-family:serif; color:#1A2E44;">{art["titolo"]}</h1><p style="color:#C5A059;">{art["data"]} • Luca Valenti</p><div style="font-family:serif; font-size:1.2rem; line-height:1.7; color:#1A2E44;">{testo_html}</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="article-box"><h1 style="font-family:serif; color:#1A2E44;">{art["titolo"]}</h1><p style="color:#C5A059;">{art["data"]} • {art.get("categoria", "Blog")}</p><div style="font-family:serif; font-size:1.2rem; line-height:1.7; color:#1A2E44;">{testo_html}</div></div>', unsafe_allow_html=True)
     else:
         st.write("Benvenuti su Sorgente Yoga.")
 
 with col_nav:
     st.markdown("### 🏛️ BIBLIOTECA")
+    
+    # Sezione Blog
     st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_archivio}" class="icon-img"><span class="icon-text">ARCHIVIO BLOG</span></div>', unsafe_allow_html=True)
     with st.expander("Sfoglia articoli", expanded=True):
-        if tutti_gli_articoli:
-            for i, a in enumerate(tutti_gli_articoli):
-                if st.button(f"📄 {a['titolo']}", key=f"nav_{i}"):
+        if articoli_blog:
+            for a in articoli_blog:
+                if st.button(f"📄 {a['titolo']}", key=f"blog_{a['titolo']}"):
                     st.session_state['articolo_selezionato'] = a
                     st.rerun()
-    st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_testi}" class="icon-img"><span class="icon-text">TESTI CLASSICI</span></div>', unsafe_allow_html=True)
+        else: st.caption("Nessun articolo nel blog.")
+
+    # Sezione Testi Antichi
+    st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_testi}" class="icon-img"><span class="icon-text">TESTI ANTICHI</span></div>', unsafe_allow_html=True)
     with st.expander("Elenco testi"):
-        st.write("• Yoga Sūtra • Haṭha Yoga Pradīpikā • Gheraṇḍa Saṃhitā")
+        if articoli_antichi:
+            for a in articoli_antichi:
+                if st.button(f"📜 {a['titolo']}", key=f"antichi_{a['titolo']}"):
+                    st.session_state['articolo_selezionato'] = a
+                    st.rerun()
+        else: st.caption("Nessun testo antico salvato.")
+
+    # Altre sezioni
     st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_storia}" class="icon-img"><span class="icon-text">RICERCA STORICA</span></div>', unsafe_allow_html=True)
     with st.expander("Siti"):
         st.markdown('<a class="resource-link" href="http://hyp.soas.ac.uk/" target="_blank">Hatha Yoga Project ↗</a>', unsafe_allow_html=True)
+    
     st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_scienza}" class="icon-img"><span class="icon-text">SCIENZA</span></div>', unsafe_allow_html=True)
     with st.expander("Istituti"):
         st.markdown('<a class="resource-link" href="https://www.iayt.org/" target="_blank">IAYT Yoga Therapy ↗</a>', unsafe_allow_html=True)
