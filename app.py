@@ -4,7 +4,7 @@ from datetime import datetime as dt
 
 st.set_page_config(page_title="SORGENTE YOGA", layout="wide", page_icon="🧘")
 
-# --- CONFIGURAZIONE GITHUB (Presi dai Secrets) ---
+# --- CONFIGURAZIONE GITHUB ---
 GITHUB_TOKEN = st.secrets.get("GITHUB_TOKEN")
 GITHUB_REPO = st.secrets.get("GITHUB_REPO")
 FILE_PATH = "archivio_articoli.json"
@@ -46,7 +46,7 @@ def get_img(p):
         except: return ""
     return ""
 
-# --- INTERFACCIA E CSS PERSONALIZZATO ---
+# --- INTERFACCIA E CSS ---
 all_a = load_a()
 ih = get_img("header_yoga.png")
 
@@ -56,7 +56,6 @@ st.markdown(f"""<style>
     .header-bar {{ background:#1A2E44; padding:15px; color:#FDFCF0; font-family: serif; text-align:center; font-size:1.6rem; letter-spacing:2px; margin-bottom:20px; }}
     .art-box {{ background: white; padding:40px; border-radius:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color:#1A2E44; min-height:500px; }}
     
-    /* Rende i bottoni nelle tendine invisibili (solo testo) */
     div[data-testid="stPopover"] button[kind="secondary"] {{
         background: transparent !important;
         border: none !important;
@@ -78,27 +77,28 @@ if 'sel_idx' not in st.session_state: st.session_state['sel_idx'] = 0 if all_a e
 if 'mode' not in st.session_state: st.session_state['mode'] = "view"
 
 # --- NAVIGAZIONE ---
-vuoto, c1, c2, c3, c4 = st.columns([0.2, 0.2, 0.2, 0.1, 0.3])
+vuoto, c1, c2, c3, c4 = st.columns([0.15, 0.2, 0.2, 0.2, 0.25])
 
 with c1:
     with st.popover("📂 ARCHIVIO", use_container_width=True):
         blog_list = [(i, a) for i, a in enumerate(all_a) if str(a.get('cat','')).upper() == 'BLOG' or not a.get('cat')]
-        if blog_list:
-            for idx, a in blog_list:
-                if st.button(a['titolo'], key=f"b_{idx}", use_container_width=True):
-                    st.session_state['sel_idx'] = idx
-                    st.session_state['mode'] = "view"; st.rerun()
-        else: st.info("Nessun articolo")
+        for idx, a in blog_list:
+            if st.button(a['titolo'], key=f"b_{idx}", use_container_width=True):
+                st.session_state['sel_idx'] = idx; st.session_state['mode'] = "view"; st.rerun()
 
 with c2:
     with st.popover("📜 TESTI ANTICHI", use_container_width=True):
         testi_list = [(i, a) for i, a in enumerate(all_a) if str(a.get('cat','')).upper() == 'TESTI']
-        if testi_list:
-            for idx, a in testi_list:
-                if st.button(a['titolo'], key=f"t_{idx}", use_container_width=True):
-                    st.session_state['sel_idx'] = idx
-                    st.session_state['mode'] = "view"; st.rerun()
-        else: st.info("Nessun testo antico")
+        for idx, a in testi_list:
+            if st.button(a['titolo'], key=f"t_{idx}", use_container_width=True):
+                st.session_state['sel_idx'] = idx; st.session_state['mode'] = "view"; st.rerun()
+
+with c3:
+    with st.popover("🔬 SCIENZA", use_container_width=True):
+        sci_list = [(i, a) for i, a in enumerate(all_a) if str(a.get('cat','')).upper() == 'SCIENZA']
+        for idx, a in sci_list:
+            if st.button(a['titolo'], key=f"s_{idx}", use_container_width=True):
+                st.session_state['sel_idx'] = idx; st.session_state['mode'] = "view"; st.rerun()
 
 # --- AREA CONTENUTO ---
 s_idx = st.session_state['sel_idx']
@@ -119,7 +119,10 @@ elif st.session_state['mode'] == "edit" and s_idx is not None:
     st.subheader("Modifica Articolo")
     curr = all_a[s_idx]
     new_t = st.text_input("Titolo", value=curr['titolo'])
-    new_c = st.radio("Sezione", ["BLOG", "TESTI"], index=0 if str(curr.get('cat','')).upper()=="BLOG" else 1)
+    cat_options = ["BLOG", "TESTI", "SCIENZA"]
+    try: idx_cat = cat_options.index(str(curr.get('cat','')).upper())
+    except: idx_cat = 0
+    new_c = st.radio("Sezione", cat_options, index=idx_cat)
     new_x = st.text_area("Testo", value=curr['testo'], height=400)
     if st.button("SALVA MODIFICHE"):
         all_a[s_idx] = {"data": curr['data'], "titolo": new_t, "testo": new_x, "cat": new_c}
@@ -129,7 +132,7 @@ elif st.session_state['mode'] == "edit" and s_idx is not None:
 elif st.session_state['mode'] == "new":
     st.subheader("Nuovo Articolo")
     t_n = st.text_input("Titolo")
-    c_n = st.radio("Sezione", ["BLOG", "TESTI"])
+    c_n = st.radio("Sezione", ["BLOG", "TESTI", "SCIENZA"])
     x_n = st.text_area("Testo", height=400)
     if st.button("PUBBLICA"):
         if t_n and x_n:
