@@ -4,7 +4,7 @@ from datetime import datetime as dt
 
 st.set_page_config(page_title="SORGENTE YOGA", layout="wide", page_icon="🧘")
 
-# --- CONFIGURAZIONE GITHUB ---
+# --- CONFIGURAZIONE GITHUB (Presi dai Secrets) ---
 GITHUB_TOKEN = st.secrets.get("GITHUB_TOKEN")
 GITHUB_REPO = st.secrets.get("GITHUB_REPO")
 FILE_PATH = "archivio_articoli.json"
@@ -46,7 +46,7 @@ def get_img(p):
         except: return ""
     return ""
 
-# --- INTERFACCIA ---
+# --- INTERFACCIA E CSS PERSONALIZZATO ---
 all_a = load_a()
 ih = get_img("header_yoga.png")
 
@@ -55,6 +55,21 @@ st.markdown(f"""<style>
     .header-img {{ width:100%; height:100px; background: url('data:image/png;base64,{ih}') no-repeat center; background-size: contain; border-bottom: 3px solid #C5A059; }}
     .header-bar {{ background:#1A2E44; padding:15px; color:#FDFCF0; font-family: serif; text-align:center; font-size:1.6rem; letter-spacing:2px; margin-bottom:20px; }}
     .art-box {{ background: white; padding:40px; border-radius:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color:#1A2E44; min-height:500px; }}
+    
+    /* Rende i bottoni nelle tendine invisibili (solo testo) */
+    div[data-testid="stPopover"] button[kind="secondary"] {{
+        background: transparent !important;
+        border: none !important;
+        color: #1A2E44 !important;
+        text-align: left !important;
+        padding: 5px 0px !important;
+        font-size: 1.1rem !important;
+        justify-content: flex-start !important;
+    }}
+    div[data-testid="stPopover"] button[kind="secondary"]:hover {{
+        color: #C5A059 !important;
+        text-decoration: underline !important;
+    }}
 </style>
 <div class="header-img"></div>
 <div class="header-bar">S O R G E N T E &nbsp; Y O G A</div>""", unsafe_allow_html=True)
@@ -72,10 +87,8 @@ with c1:
             for idx, a in blog_list:
                 if st.button(a['titolo'], key=f"b_{idx}", use_container_width=True):
                     st.session_state['sel_idx'] = idx
-                    st.session_state['mode'] = "view"
-                    st.rerun()
-        else:
-            st.info("Nessun articolo nel blog")
+                    st.session_state['mode'] = "view"; st.rerun()
+        else: st.info("Nessun articolo")
 
 with c2:
     with st.popover("📜 TESTI ANTICHI", use_container_width=True):
@@ -84,10 +97,8 @@ with c2:
             for idx, a in testi_list:
                 if st.button(a['titolo'], key=f"t_{idx}", use_container_width=True):
                     st.session_state['sel_idx'] = idx
-                    st.session_state['mode'] = "view"
-                    st.rerun()
-        else:
-            st.info("Nessun testo antico caricato")
+                    st.session_state['mode'] = "view"; st.rerun()
+        else: st.info("Nessun testo antico")
 
 # --- AREA CONTENUTO ---
 s_idx = st.session_state['sel_idx']
@@ -103,8 +114,6 @@ if st.session_state['mode'] == "view":
                 {display["testo"].replace(chr(10), '<br>')}
             </div>
         </div>""", unsafe_allow_html=True)
-    else:
-        st.info("Seleziona un contenuto o creane uno nuovo.")
 
 elif st.session_state['mode'] == "edit" and s_idx is not None:
     st.subheader("Modifica Articolo")
