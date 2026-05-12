@@ -58,29 +58,31 @@ with c_main:
         st.info("✍️ MODALITÀ EDITORE")
         if tutti:
             st.download_button("📥 BACKUP", json.dumps(tutti, ensure_ascii=False), "backup.json")
-        with st.expander("📝 NUOVO"):
+        with st.expander("📝 SCRIVI NUOVO ARTICOLO"):
             cat = st.radio("Sezione", ["ARCHIVIO BLOG", "TESTI ANTICHI"])
-            tit = st.text_input("Titolo")
-            tes = st.text_area("Testo", height=200)
+            tit = st.text_input("Titolo articolo")
+            tes = st.text_area("Testo dell'articolo", height=500)
             if st.button("🚀 Pubblica") and tit and tes:
                 tutti.insert(0, {"data": datetime.now().strftime("%d/%m/%Y"), "titolo": tit, "testo": tes, "categoria": cat})
                 salva_tutti_articoli(tutti)
                 st.rerun()
-        with st.expander("✏️ MODIFICA / ELIMINA"):
+        with st.expander("✏️ MODIFICA / ELIMINA ARTICOLI"):
             if tutti:
-                sel = st.selectbox("Articolo", [a['titolo'] for a in tutti])
+                sel = st.selectbox("Seleziona articolo da modificare", [a['titolo'] for a in tutti])
                 idx = [a['titolo'] for a in tutti].index(sel)
-                tutti[idx]['categoria'] = st.radio("Cat", ["ARCHIVIO BLOG", "TESTI ANTICHI"], index=0 if tutti[idx].get('categoria', 'ARCHIVIO BLOG') == "ARCHIVIO BLOG" else 1)
+                tutti[idx]['categoria'] = st.radio("Categoria", ["ARCHIVIO BLOG", "TESTI ANTICHI"], index=0 if tutti[idx].get('categoria', 'ARCHIVIO BLOG') == "ARCHIVIO BLOG" else 1)
                 tutti[idx]['titolo'] = st.text_input("Titolo attuale", tutti[idx]['titolo'])
-                tutti[idx]['testo'] = st.text_area("Testo attuale", tutti[idx]['testo'], height=200)
-                if st.button("💾 Salva"):
+                tutti[idx]['testo'] = st.text_area("Contenuto", tutti[idx]['testo'], height=600)
+                c1, c2 = st.columns(2)
+                if c1.button("💾 Salva modifiche"):
                     salva_tutti_articoli(tutti)
+                    st.success("Salvato!")
                     st.rerun()
-                if st.button("🗑️ Elimina"):
+                if c2.button("🗑️ Elimina permanentemente"):
                     tutti.pop(idx)
                     salva_tutti_articoli(tutti)
                     st.rerun()
-        if st.button("🔒 Esci"):
+        if st.button("🔒 Esci dalla modalità editore"):
             st.session_state['admin'] = False
             st.rerun()
 
@@ -99,14 +101,11 @@ with c_nav:
                 st.session_state['art_sel'] = a
                 st.rerun()
     st.markdown(f'<div class="icon-title"><img src="data:image/png;base64,{i_tes}" width="25"> TESTI ANTICHI</div>', unsafe_allow_html=True)
-    with st.expander("Elenco"):
+    with st.expander("Elenco testi"):
         for j, a in enumerate(arts_antichi):
             if st.button(f"📜 {a['titolo']}", key=f"t{j}"):
                 st.session_state['art_sel'] = a
                 st.rerun()
     st.markdown(f'<div class="icon-title"><img src="data:image/png;base64,{i_sto}" width="25"> RICERCA STORICA</div>', unsafe_allow_html=True)
-    with st.expander("Link"):
-        st.markdown('<a class="resource-link" href="http://hyp.soas.ac.uk/" target="_blank">Hatha Yoga Project ↗</a>', unsafe_allow_html=True)
-    st.markdown(f'<div class="icon-title"><img src="data:image/png;base64,{i_sci}" width="25"> SCIENZA</div>', unsafe_allow_html=True)
-    with st.expander("Link"):
-        st.markdown('<a class="resource-link" href="https://www.iayt.org/" target="_blank">IAYT Yoga Therapy ↗</a>', unsafe_allow_html=True)
+    with st.expander("Siti"):
+        st.markdown('<a class="resource-link
