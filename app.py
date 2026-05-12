@@ -78,7 +78,7 @@ if 'sel_idx' not in st.session_state: st.session_state['sel_idx'] = 0 if all_a e
 if 'mode' not in st.session_state: st.session_state['mode'] = "view"
 
 # --- NAVIGAZIONE ---
-c1, c2, c3, c4, c5 = st.columns([0.2, 0.2, 0.15, 0.15, 0.3])
+vuoto, c1, c2, c3, c4, c5 = st.columns([0.2, 0.2, 0.15, 0.15, 0.3])
 
 with c1:
     with st.popover("📂 ARCHIVIO", use_container_width=True):
