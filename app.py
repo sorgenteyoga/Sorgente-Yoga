@@ -45,13 +45,12 @@ with c1:
     if not st.session_state['adm']:
         with st.expander("🔑"):
             if st.text_input("Pwd", type="password") == "sorgente2026":
-                st.session_state['adm'] = True
-                st.rerun()
+                st.session_state['adm'] = True; st.rerun()
     else:
         st.info("✍️ EDITORE")
         st.download_button("📥 BACKUP", json.dumps(all_a, ensure_ascii=False), "yoga.json")
         with st.expander("📝 NUOVO"):
-            ct = st.radio("Sez", ["BLOG", "TESTI"])
+            ct = st.radio("Sezione", ["BLOG", "TESTI"], key="new_cat")
             tt = st.text_input("Titolo")
             tx = st.text_area("Testo", height=500)
             if st.button("🚀") and tt and tx:
@@ -61,7 +60,7 @@ with c1:
             if all_a:
                 s = st.selectbox("Art", [x['titolo'] for x in all_a])
                 i = [x['titolo'] for x in all_a].index(s)
-                all_a[i]['cat'] = st.radio("Sez", ["BLOG", "TESTI"], index=0 if all_a[i].get('cat', 'BLOG') == "BLOG" else 1)
+                all_a[i]['cat'] = st.radio("Sezione", ["BLOG", "TESTI"], index=0 if all_a[i].get('cat', 'BLOG') == "BLOG" else 1, key="edit_cat")
                 all_a[i]['titolo'] = st.text_input("Tit", all_a[i]['titolo'])
                 all_a[i]['testo'] = st.text_area("Txt", all_a[i]['testo'], height=600)
                 if st.button("💾"): save_a(all_a); st.rerun()
@@ -76,12 +75,12 @@ with c2:
     st.markdown("### 🏛️ BIBLIOTECA")
     st.markdown(f'<div class="i-title"><img src="data:image/png;base64,{i_a}" width="22"> ARCHIVIO</div>', unsafe_allow_html=True)
     with st.expander("Blog", expanded=True):
-        for i, a in enumerate(b_a):
-            if st.button(f"📄 {a['titolo']}", key=f"b{i}"): st.session_state['sel'] = a; st.rerun()
+        for idx, a in enumerate(b_a):
+            if st.button(f"📄 {a['titolo']}", key=f"b{idx}"): st.session_state['sel'] = a; st.rerun()
     st.markdown(f'<div class="i-title"><img src="data:image/png;base64,{i_t}" width="22"> TESTI ANTICHI</div>', unsafe_allow_html=True)
     with st.expander("Elenco"):
-        for j, a in enumerate(t_a):
-            if st.button(f"📜 {a['titolo']}", key=f"t{j}"): st.session_state['sel'] = a; st.rerun()
+        for jdx, a in enumerate(t_a):
+            if st.button(f"📜 {a['titolo']}", key=f"t{jdx}"): st.session_state['sel'] = a; st.rerun()
     st.markdown(f'<div class="i-title"><img src="data:image/png;base64,{i_s}" width="22"> STORIA</div>', unsafe_allow_html=True)
     st.markdown('<a class="r-link" href="http://hyp.soas.ac.uk/" target="_blank">Hatha Yoga Project ↗</a>', unsafe_allow_html=True)
     st.markdown(f'<div class="i-title"><img src="data:image/png;base64,{i_z}" width="22"> SCIENZA</div>', unsafe_allow_html=True)
