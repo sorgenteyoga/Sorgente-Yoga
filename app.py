@@ -125,7 +125,21 @@ with col_main:
             st.session_state['admin'] = False
             st.rerun()
 
+# --- VISUALIZZAZIONE ARTICOLO (FIX SINTASSI) ---
     art = st.session_state['articolo_selezionato'] if st.session_state['articolo_selezionato'] else (tutti_gli_articoli[0] if tutti_gli_articoli else None)
+    
     if art:
         testo_visualizzato = art['testo'].replace('\n', '<br>')
-        st.markdown(
+        # Costruiamo l'HTML separatamente per evitare errori con le f-strings
+        html_articolo = f"""
+        <div class="article-box">
+            <h1 style='font-family:serif; color:#1A2E44; margin-top:0; margin-bottom:10px;'>{art['titolo']}</h1>
+            <p style='font-style:italic; color:#C5A059; margin-bottom:30px;'>{art['data']} • Luca Valenti</p>
+            <div style="font-family:serif; font-size:1.3rem; line-height:1.8; color:#1A2E44; display:block;">
+                {testo_visualizzato}
+            </div>
+        </div>
+        """
+        st.markdown(html_articolo, unsafe_allow_html=True)
+    else:
+        st.write("Benvenuti su Sorgente Yoga.")
