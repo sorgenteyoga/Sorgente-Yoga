@@ -10,20 +10,20 @@ GITHUB_REPO = st.secrets.get("GITHUB_REPO")
 FILE_PATH = "archivio_articoli.json"
 
 def save_to_github(content):
-    if not GITHUB_TOKEN or not GITHUB_REPO:
-        return
-    url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{FILE_PATH}"
-    headers = {"Authorization": f"token {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
-    r = requests.get(url, headers=headers)
-    sha = r.json().get('sha') if r.status_code == 200 else None
-    data = {
-        "message": f"Aggiornamento Sorgente Yoga {dt.now().strftime('%d/%m/%Y %H:%M')}",
-        "content": base64.b64encode(content.encode("utf-8")).decode("utf-8"),
-        "sha": sha
-    }
-    requests.put(url, headers=headers, data=json.dumps(data))
+    if not GITHUB_TOKEN or not GITHUB_REPO: return
+    try:
+        url = f"https://api.github.com/repos/{GITHUB_REPO}/contents/{FILE_PATH}"
+        headers = {"Authorization": f"token {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
+        r = requests.get(url, headers=headers)
+        sha = r.json().get('sha') if r.status_code == 200 else None
+        data = {
+            "message": f"Update {dt.now().strftime('%d/%m/%Y %H:%M')}",
+            "content": base64.b64encode(content.encode("utf-8")).decode("utf-8"),
+            "sha": sha
+        }
+        requests.put(url, headers=headers, data=json.dumps(data))
+    except: pass
 
-# --- FUNZIONI DATI ---
 def load_a():
     if os.path.exists(FILE_PATH):
         try:
@@ -46,7 +46,7 @@ def get_img(p):
         except: return ""
     return ""
 
-# --- INTERFACCIA E STILE ---
+# --- INTERFACCIA ---
 all_a = load_a()
 ih = get_img("header_yoga.png")
 
@@ -55,7 +55,6 @@ st.markdown(f"""<style>
     .header-img {{ width:100%; height:100px; background: url('data:image/png;base64,{ih}') no-repeat center; background-size: contain; border-bottom: 3px solid #C5A059; }}
     .header-bar {{ background:#1A2E44; padding:15px; color:#FDFCF0; font-family: serif; text-align:center; font-size:1.6rem; letter-spacing:2px; margin-bottom:20px; }}
     .art-box {{ background: white; padding:40px; border-radius:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color:#1A2E44; min-height:500px; }}
-    #MainMenu, footer, header {{ visibility:hidden; }}
 </style>
 <div class="header-img"></div>
 <div class="header-bar">S O R G E N T E &nbsp; Y O G A</div>""", unsafe_allow_html=True)
@@ -68,28 +67,34 @@ c1, c2, c3, c4, c5 = st.columns([0.2, 0.2, 0.15, 0.15, 0.3])
 
 with c1:
     with st.popover("📂 ARCHIVIO", use_container_width=True):
-        for i, a in enumerate(all_a):
-            if str(a.get('cat', '')).upper() == 'BLOG' or not a.get('cat'):
-                if st.button(a['titolo'], key=f"b_{i}", use_container_width=True):
-                    st.session_state['sel_idx'] = i
+        blog_list = [(i, a) for i, a in enumerate(all_a) if str(a.get('cat','')).upper() == 'BLOG' or not a.get('cat')]
+        if blog_list:
+            for idx, a in blog_list:
+                if st.button(a['titolo'], key=f"b_{idx}", use_container_width=True):
+                    st.session_state['sel_idx'] = idx
                     st.session_state['mode'] = "view"
                     st.rerun()
+        else:
+            st.info("Nessun articolo nel blog")
 
 with c2:
     with st.popover("📜 TESTI ANTICHI", use_container_width=True):
-        for i, a in enumerate(all_a):
-            if str(a.get('cat', '')).upper() == 'TESTI':
-                if st.button(a['titolo'], key=f"t_{i}", use_container_width=True):
-                    st.session_state['sel_idx'] = i
+        testi_list = [(i, a) for i, a in enumerate(all_a) if str(a.get('cat','')).upper() == 'TESTI']
+        if testi_list:
+            for idx, a in testi_list:
+                if st.button(a['titolo'], key=f"t_{idx}", use_container_width=True):
+                    st.session_state['sel_idx'] = idx
                     st.session_state['mode'] = "view"
                     st.rerun()
+        else:
+            st.info("Nessun testo antico caricato")
 
 # --- AREA CONTENUTO ---
-idx = st.session_state['sel_idx']
+s_idx = st.session_state['sel_idx']
 
 if st.session_state['mode'] == "view":
-    if idx is not None and idx < len(all_a):
-        display = all_a[idx]
+    if s_idx is not None and s_idx < len(all_a):
+        display = all_a[s_idx]
         st.markdown(f"""<div class="art-box">
             <h1 style="font-family:serif; color:#1A2E44; margin-top:0;">{display["titolo"]}</h1>
             <p style="color:#C5A059; font-style:italic;">{display["data"]}</p>
@@ -98,15 +103,17 @@ if st.session_state['mode'] == "view":
                 {display["testo"].replace(chr(10), '<br>')}
             </div>
         </div>""", unsafe_allow_html=True)
+    else:
+        st.info("Seleziona un contenuto o creane uno nuovo.")
 
-elif st.session_state['mode'] == "edit" and idx is not None:
+elif st.session_state['mode'] == "edit" and s_idx is not None:
     st.subheader("Modifica Articolo")
-    curr = all_a[idx]
+    curr = all_a[s_idx]
     new_t = st.text_input("Titolo", value=curr['titolo'])
     new_c = st.radio("Sezione", ["BLOG", "TESTI"], index=0 if str(curr.get('cat','')).upper()=="BLOG" else 1)
     new_x = st.text_area("Testo", value=curr['testo'], height=400)
     if st.button("SALVA MODIFICHE"):
-        all_a[idx] = {"data": curr['data'], "titolo": new_t, "testo": new_x, "cat": new_c}
+        all_a[s_idx] = {"data": curr['data'], "titolo": new_t, "testo": new_x, "cat": new_c}
         save_a(all_a)
         st.session_state['mode'] = "view"; st.rerun()
 
