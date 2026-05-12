@@ -1,111 +1,88 @@
 import streamlit as st
 import base64, os, json
-from datetime import datetime
+from datetime import datetime as dt
 
 st.set_page_config(page_title="SORGENTE YOGA", layout="wide", page_icon="🧘")
 
-def get_base64_image(p):
+def get_img(p):
     if os.path.exists(p):
         with open(p, "rb") as f: return base64.b64encode(f.read()).decode()
     return ""
 
-def carica_articoli():
+def load_a():
     if os.path.exists("archivio_articoli.json"):
         with open("archivio_articoli.json", "r", encoding="utf-8") as f: return json.load(f)
     return []
 
-def salva_tutti_articoli(arts):
+def save_a(arts):
     with open("archivio_articoli.json", "w", encoding="utf-8") as f: json.dump(arts, f, ensure_ascii=False, indent=4)
 
-img_h = get_base64_image("header_yoga.png")
-i_arc = get_base64_image("icona_archivio.png")
-i_tes = get_base64_image("icona_testi.png")
-i_sto = get_base64_image("icona_storia.png")
-i_sci = get_base64_image("icona_scienza.png")
+ih, i_a, i_t, i_s, i_z = get_img("header_yoga.png"), get_img("icona_archivio.png"), get_img("icona_testi.png"), get_img("icona_storia.png"), get_img("icona_scienza.png")
 
-st.markdown(f"""
-<style>
-.stApp {{ background-color: #FDFCF0; }}
+st.markdown(f"""<style>
+.stApp {{ background:#FDFCF0; }}
 .block-container {{ padding: 1rem 5% !important; }}
-.header-container {{ border-bottom: 3px solid #C5A059; margin-bottom: 25px; }}
-.header-image {{ width: 100%; height: 120px; background: url('data:image/png;base64,{img_h}') no-repeat center; background-size: contain; }}
-.header-title-bar {{ background: #1A2E44; padding: 10px; color: #FDFCF0; font-family: serif; font-size: 1.2rem; text-align: center; letter-spacing: 2px; }}
-.article-box {{ background: white; padding: 30px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }}
-@media (max-width: 768px) {{ .header-image {{ height: 80px; }} .article-box {{ padding: 15px; }} }}
-.icon-title {{ display: flex; align-items: center; gap: 10px; margin-top: 20px; font-family: serif; font-weight: bold; color: #1A2E44; }}
-.resource-link {{ text-decoration: none; color: #1A2E44 !important; font-weight: bold; display: block; padding: 5px 0; border-bottom: 1px solid #eee; }}
-#MainMenu, footer, header {{ visibility: hidden; }}
+.header-image {{ width:100%; height:110px; background:url('data:image/png;base64,{ih}') no-repeat center; background-size:contain; border-bottom:3px solid #C5A059; }}
+.header-bar {{ background:#1A2E44; padding:8px; color:#FDFCF0; font-family:serif; text-align:center; letter-spacing:2px; }}
+.art-box {{ background:white; padding:30px; border-radius:5px; box-shadow:0 2px 10px rgba(0,0,0,0.05); }}
+@media (max-width:768px) {{ .header-image {{ height:70px; }} .art-box {{ padding:15px; }} }}
+.i-title {{ display:flex; align-items:center; gap:8px; margin-top:15px; font-family:serif; font-weight:bold; color:#1A2E44; }}
+.r-link {{ text-decoration:none; color:#1A2E44 !important; font-weight:bold; display:block; padding:4px 0; border-bottom:1px solid #eee; }}
+#MainMenu, footer, header {{ visibility:hidden; }}
 </style>
-<div class="header-container"><div class="header-image"></div><div class="header-title-bar">S O R G E N T E &nbsp; Y O G A</div></div>
-""", unsafe_allow_html=True)
+<div class="header-image"></div><div class="header-bar">S O R G E N T E &nbsp; Y O G A</div>""", unsafe_allow_html=True)
 
-if 'admin' not in st.session_state: st.session_state['admin'] = False
-if 'art_sel' not in st.session_state: st.session_state['art_sel'] = None
+if 'adm' not in st.session_state: st.session_state['adm'] = False
+if 'sel' not in st.session_state: st.session_state['sel'] = None
 
-tutti = carica_articoli()
-arts_blog = [a for a in tutti if a.get('categoria', 'ARCHIVIO BLOG') == 'ARCHIVIO BLOG']
-arts_antichi = [a for a in tutti if a.get('categoria') == 'TESTI ANTICHI']
+all_a = load_a()
+b_a = [a for a in all_a if a.get('cat', 'BLOG') == 'BLOG']
+t_a = [a for a in all_a if a.get('cat') == 'TESTI']
 
-c_main, c_nav = st.columns([0.7, 0.3], gap="large")
+c1, c2 = st.columns([0.7, 0.3], gap="large")
 
-with c_main:
-    if not st.session_state['admin']:
-        with st.expander("🔑 Area Autore"):
-            if st.text_input("Password", type="password") == "sorgente2026":
-                st.session_state['admin'] = True
+with c1:
+    if not st.session_state['adm']:
+        with st.expander("🔑"):
+            if st.text_input("Pwd", type="password") == "sorgente2026":
+                st.session_state['adm'] = True
                 st.rerun()
     else:
-        st.info("✍️ MODALITÀ EDITORE")
-        if tutti:
-            st.download_button("📥 BACKUP", json.dumps(tutti, ensure_ascii=False), "backup.json")
-        with st.expander("📝 SCRIVI NUOVO ARTICOLO"):
-            cat = st.radio("Sezione", ["ARCHIVIO BLOG", "TESTI ANTICHI"])
-            tit = st.text_input("Titolo articolo")
-            tes = st.text_area("Testo dell'articolo", height=500)
-            if st.button("🚀 Pubblica") and tit and tes:
-                tutti.insert(0, {"data": datetime.now().strftime("%d/%m/%Y"), "titolo": tit, "testo": tes, "categoria": cat})
-                salva_tutti_articoli(tutti)
-                st.rerun()
-        with st.expander("✏️ MODIFICA / ELIMINA ARTICOLI"):
-            if tutti:
-                sel = st.selectbox("Seleziona articolo da modificare", [a['titolo'] for a in tutti])
-                idx = [a['titolo'] for a in tutti].index(sel)
-                tutti[idx]['categoria'] = st.radio("Categoria", ["ARCHIVIO BLOG", "TESTI ANTICHI"], index=0 if tutti[idx].get('categoria', 'ARCHIVIO BLOG') == "ARCHIVIO BLOG" else 1)
-                tutti[idx]['titolo'] = st.text_input("Titolo attuale", tutti[idx]['titolo'])
-                tutti[idx]['testo'] = st.text_area("Contenuto", tutti[idx]['testo'], height=600)
-                c1, c2 = st.columns(2)
-                if c1.button("💾 Salva modifiche"):
-                    salva_tutti_articoli(tutti)
-                    st.success("Salvato!")
-                    st.rerun()
-                if c2.button("🗑️ Elimina permanentemente"):
-                    tutti.pop(idx)
-                    salva_tutti_articoli(tutti)
-                    st.rerun()
-        if st.button("🔒 Esci dalla modalità editore"):
-            st.session_state['admin'] = False
-            st.rerun()
+        st.info("✍️ EDITORE")
+        st.download_button("📥 BACKUP", json.dumps(all_a, ensure_ascii=False), "yoga.json")
+        with st.expander("📝 NUOVO"):
+            ct = st.radio("Sez", ["BLOG", "TESTI"])
+            tt = st.text_input("Titolo")
+            tx = st.text_area("Testo", height=500)
+            if st.button("🚀") and tt and tx:
+                all_a.insert(0, {"data": dt.now().strftime("%d/%m/%Y"), "titolo": tt, "testo": tx, "cat": ct})
+                save_a(all_a); st.rerun()
+        with st.expander("✏️ MOD"):
+            if all_a:
+                s = st.selectbox("Art", [x['titolo'] for x in all_a])
+                i = [x['titolo'] for x in all_a].index(s)
+                all_a[i]['cat'] = st.radio("Sez", ["BLOG", "TESTI"], index=0 if all_a[i].get('cat', 'BLOG') == "BLOG" else 1)
+                all_a[i]['titolo'] = st.text_input("Tit", all_a[i]['titolo'])
+                all_a[i]['testo'] = st.text_area("Txt", all_a[i]['testo'], height=600)
+                if st.button("💾"): save_a(all_a); st.rerun()
+                if st.button("🗑️"): all_a.pop(i); save_a(all_a); st.rerun()
+        if st.button("🔒"): st.session_state['adm'] = False; st.rerun()
 
-    art = st.session_state['art_sel'] if st.session_state['art_sel'] else (tutti[0] if tutti else None)
-    if art:
-        txt = art['testo'].replace('\n', '<br>')
-        st.markdown(f'<div class="article-box"><h1 style="font-family:serif; color:#1A2E44;">{art["titolo"]}</h1><p style="color:#C5A059;">{art["data"]} • {art.get("categoria","Blog")}</p><div style="font-family:serif; font-size:1.2rem; line-height:1.7;">{txt}</div></div>', unsafe_allow_html=True)
-    else: st.write("Benvenuti su Sorgente Yoga.")
+    cur = st.session_state['sel'] if st.session_state['sel'] else (all_a[0] if all_a else None)
+    if cur:
+        st.markdown(f'<div class="art-box"><h1 style="font-family:serif; color:#1A2E44;">{cur["titolo"]}</h1><p style="color:#C5A059;">{cur["data"]}</p><div style="font-family:serif; font-size:1.15rem; line-height:1.7;">{cur["testo"].replace("\n","<br>")}</div></div>', unsafe_allow_html=True)
 
-with c_nav:
+with c2:
     st.markdown("### 🏛️ BIBLIOTECA")
-    st.markdown(f'<div class="icon-title"><img src="data:image/png;base64,{i_arc}" width="25"> ARCHIVIO BLOG</div>', unsafe_allow_html=True)
-    with st.expander("Articoli", expanded=True):
-        for i, a in enumerate(arts_blog):
-            if st.button(f"📄 {a['titolo']}", key=f"b{i}"):
-                st.session_state['art_sel'] = a
-                st.rerun()
-    st.markdown(f'<div class="icon-title"><img src="data:image/png;base64,{i_tes}" width="25"> TESTI ANTICHI</div>', unsafe_allow_html=True)
-    with st.expander("Elenco testi"):
-        for j, a in enumerate(arts_antichi):
-            if st.button(f"📜 {a['titolo']}", key=f"t{j}"):
-                st.session_state['art_sel'] = a
-                st.rerun()
-    st.markdown(f'<div class="icon-title"><img src="data:image/png;base64,{i_sto}" width="25"> RICERCA STORICA</div>', unsafe_allow_html=True)
-    with st.expander("Siti"):
-        st.markdown('<a class="resource-link
+    st.markdown(f'<div class="i-title"><img src="data:image/png;base64,{i_a}" width="22"> ARCHIVIO</div>', unsafe_allow_html=True)
+    with st.expander("Blog", expanded=True):
+        for i, a in enumerate(b_a):
+            if st.button(f"📄 {a['titolo']}", key=f"b{i}"): st.session_state['sel'] = a; st.rerun()
+    st.markdown(f'<div class="i-title"><img src="data:image/png;base64,{i_t}" width="22"> TESTI ANTICHI</div>', unsafe_allow_html=True)
+    with st.expander("Elenco"):
+        for j, a in enumerate(t_a):
+            if st.button(f"📜 {a['titolo']}", key=f"t{j}"): st.session_state['sel'] = a; st.rerun()
+    st.markdown(f'<div class="i-title"><img src="data:image/png;base64,{i_s}" width="22"> STORIA</div>', unsafe_allow_html=True)
+    st.markdown('<a class="r-link" href="http://hyp.soas.ac.uk/" target="_blank">Hatha Yoga Project ↗</a>', unsafe_allow_html=True)
+    st.markdown(f'<div class="i-title"><img src="data:image/png;base64,{i_z}" width="22"> SCIENZA</div>', unsafe_allow_html=True)
+    st.markdown('<a class="r-link" href="https://www.iayt.org/" target="_blank">IAYT Yoga Therapy ↗</a>', unsafe_allow_html=True)
