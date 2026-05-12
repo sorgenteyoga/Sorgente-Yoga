@@ -69,8 +69,10 @@ if 'articolo_selezionato' not in st.session_state: st.session_state['articolo_se
 
 tutti_gli_articoli = carica_articoli()
 
-# Separazione logica degli articoli per categoria
-articoli_blog = [a for a in tutti_gli_articoli if a.get('categoria') == 'ARCHIVIO BLOG']
+# --- RECUPERO INTELLIGENTE (Fix per articoli spariti) ---
+# Gli articoli senza categoria o con categoria Blog finiscono in Blog
+articoli_blog = [a for a in tutti_gli_articoli if a.get('categoria', 'ARCHIVIO BLOG') == 'ARCHIVIO BLOG']
+# Solo quelli esplicitamente marcati finiscono in Testi Antichi
 articoli_antichi = [a for a in tutti_gli_articoli if a.get('categoria') == 'TESTI ANTICHI']
 
 col_main, col_nav = st.columns([0.7, 0.3], gap="large")
@@ -109,7 +111,9 @@ with col_main:
                 nomi = [a['titolo'] for a in tutti_gli_articoli]
                 scelta = st.selectbox("Seleziona articolo", nomi)
                 idx = nomi.index(scelta)
-                edit_cat = st.radio("Categoria", ["ARCHIVIO BLOG", "TESTI ANTICHI"], index=0 if tutti_gli_articoli[idx].get('categoria') == "ARCHIVIO BLOG" else 1)
+                # Imposta categoria di default se mancante
+                cat_attuale = tutti_gli_articoli[idx].get('categoria', 'ARCHIVIO BLOG')
+                edit_cat = st.radio("Categoria", ["ARCHIVIO BLOG", "TESTI ANTICHI"], index=0 if cat_attuale == "ARCHIVIO BLOG" else 1)
                 edit_tit = st.text_input("Modifica Titolo", tutti_gli_articoli[idx]['titolo'])
                 edit_tes = st.text_area("Modifica Testo", tutti_gli_articoli[idx]['testo'], height=300)
                 
@@ -133,38 +137,30 @@ with col_main:
     art = st.session_state['articolo_selezionato'] if st.session_state['articolo_selezionato'] else (tutti_gli_articoli[0] if tutti_gli_articoli else None)
     if art:
         testo_html = art['testo'].replace('\n', '<br>')
-        st.markdown(f'<div class="article-box"><h1 style="font-family:serif; color:#1A2E44;">{art["titolo"]}</h1><p style="color:#C5A059;">{art["data"]} • {art.get("categoria", "Blog")}</p><div style="font-family:serif; font-size:1.2rem; line-height:1.7; color:#1A2E44;">{testo_html}</div></div>', unsafe_allow_html=True)
+        categoria_label = art.get('categoria', 'Blog')
+        st.markdown(f'<div class="article-box"><h1 style="font-family:serif; color:#1A2E44;">{art["titolo"]}</h1><p style="color:#C5A059;">{art["data"]} • {categoria_label}</p><div style="font-family:serif; font-size:1.2rem; line-height:1.7; color:#1A2E44;">{testo_html}</div></div>', unsafe_allow_html=True)
     else:
         st.write("Benvenuti su Sorgente Yoga.")
 
 with col_nav:
     st.markdown("### 🏛️ BIBLIOTECA")
     
-    # Sezione Blog
     st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_archivio}" class="icon-img"><span class="icon-text">ARCHIVIO BLOG</span></div>', unsafe_allow_html=True)
     with st.expander("Sfoglia articoli", expanded=True):
         if articoli_blog:
-            for a in articoli_blog:
-                if st.button(f"📄 {a['titolo']}", key=f"blog_{a['titolo']}"):
+            for i, a in enumerate(articoli_blog):
+                if st.button(f"📄 {a['titolo']}", key=f"blog_btn_{i}"):
                     st.session_state['articolo_selezionato'] = a
                     st.rerun()
         else: st.caption("Nessun articolo nel blog.")
 
-    # Sezione Testi Antichi
     st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_testi}" class="icon-img"><span class="icon-text">TESTI ANTICHI</span></div>', unsafe_allow_html=True)
     with st.expander("Elenco testi"):
         if articoli_antichi:
-            for a in articoli_antichi:
-                if st.button(f"📜 {a['titolo']}", key=f"antichi_{a['titolo']}"):
+            for j, a in enumerate(articoli_antichi):
+                if st.button(f"📜 {a['titolo']}", key=f"antichi_btn_{j}"):
                     st.session_state['articolo_selezionato'] = a
                     st.rerun()
         else: st.caption("Nessun testo antico salvato.")
 
-    # Altre sezioni
-    st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_storia}" class="icon-img"><span class="icon-text">RICERCA STORICA</span></div>', unsafe_allow_html=True)
-    with st.expander("Siti"):
-        st.markdown('<a class="resource-link" href="http://hyp.soas.ac.uk/" target="_blank">Hatha Yoga Project ↗</a>', unsafe_allow_html=True)
-    
-    st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_scienza}" class="icon-img"><span class="icon-text">SCIENZA</span></div>', unsafe_allow_html=True)
-    with st.expander("Istituti"):
-        st.markdown('<a class="resource-link" href="https://www.iayt.org/" target="_blank">IAYT Yoga Therapy ↗</a>', unsafe_allow_html=True)
+    st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_storia}" class="icon-img"><span class="
