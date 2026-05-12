@@ -36,50 +36,41 @@ icon_testi = get_base64_image("icona_testi.png")
 icon_storia = get_base64_image("icona_storia.png")
 icon_scienza = get_base64_image("icona_scienza.png")
 
-# --- CSS ---
-st.markdown(f"""
-    <style>
- # --- CSS RESPONSIVE ---
-st.markdown(f"""
+# --- CSS E HEADER (VERSIONE RESPONSIVE) ---
+css_code = f"""
     <style>
     .stApp {{ background-color: #FDFCF0; }}
     
-    /* Layout generale */
     .block-container {{ 
         padding-top: 1rem !important; 
         padding-bottom: 1rem !important; 
         max-width: 95%; 
     }}
 
-    /* Header adattivo */
     .header-container {{ width: 100%; background-color: #FDFCF0; border-bottom: 3px solid #C5A059; margin-bottom: 25px; }}
+    
     .header-image {{ 
-        width: 100%; height: 120px; /* Ridotto per mobile */
+        width: 100%; height: 120px;
         background-image: url('data:image/png;base64,{img_header}'); 
         background-size: contain; background-repeat: no-repeat; background-position: center; 
     }}
+
     .header-title-bar {{ 
         background-color: #1A2E44; padding: 10px; color: #FDFCF0; 
-        font-family: 'serif'; font-size: 1.2rem; /* Font più piccolo per mobile */
+        font-family: 'serif'; font-size: 1.2rem;
         letter-spacing: 2px; text-align: center; 
     }}
 
-    /* Box Articolo adattivo */
     .article-box {{ 
-        background-color: white; 
-        padding: 20px; /* Meno spazio interno su mobile */
-        border-radius: 5px; 
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
-        margin-top: 10px; 
+        background-color: white; padding: 30px; border-radius: 5px; 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-top: 10px; 
     }}
 
-    /* Ottimizzazione testo per schermi piccoli */
+    /* Regole per Mobile (Cellulare) */
     @media (max-width: 768px) {{
-        .header-image {{ height: 80px; }}
-        .header-title-bar {{ font-size: 1rem; letter-spacing: 1px; }}
-        .article-box {{ padding: 15px; }}
-        h1 {{ font-size: 1.5rem !important; }} /* Titoli più piccoli sul telefono */
-        div {{ font-size: 1.1rem !important; }} /* Testo leggibile ma non gigante */
+        .header-image {{ height: 80px !important; }}
+        .header-title-bar {{ font-size: 1rem !important; padding: 8px !important; }}
+        .article-box {{ padding: 15px !important; }}
     }}
 
     .icon-title-container {{ display: flex; align-items: center; gap: 12px; margin-top: 25px; margin-bottom: 10px; }}
@@ -87,16 +78,18 @@ st.markdown(f"""
     .icon-text {{ font-weight: bold; color: #1A2E44; font-family: 'serif'; font-size: 1rem; }}
     .resource-link {{ text-decoration: none; color: #1A2E44 !important; font-weight: bold; display: block; padding: 8px 0; border-bottom: 1px solid #eee; }}
     
-    #MainMenu, footer, header {{visibility: hidden;}}
+    #MainMenu, footer, header {{ visibility: hidden; }}
     </style>
-    """, unsafe_allow_html=True)
-    </style>
+
     <div class="header-container">
         <div class="header-image"></div>
         <div class="header-title-bar">S O R G E N T E &nbsp; Y O G A</div>
     </div>
-    """, unsafe_allow_html=True)
+"""
 
+st.markdown(css_code, unsafe_allow_html=True)
+
+# --- LOGICA DI NAVIGAZIONE ---
 if 'admin' not in st.session_state: st.session_state['admin'] = False
 if 'articolo_selezionato' not in st.session_state: st.session_state['articolo_selezionato'] = None
 
@@ -114,7 +107,7 @@ with col_main:
                 st.session_state['admin'] = True
                 st.rerun()
     
-    # AREA EDITORE
+    # AREA EDITORE (BACKUP E SCRITTURA)
     if st.session_state['admin']:
         st.info("✍️ MODALITÀ EDITORE")
         
@@ -141,29 +134,20 @@ with col_main:
                 nomi = [a['titolo'] for a in tutti_gli_articoli]
                 scelta = st.selectbox("Seleziona articolo", nomi)
                 idx = nomi.index(scelta)
-                edit_tit = st.text_input("Titolo", tutti_gli_articoli[idx]['titolo'])
-                edit_tes = st.text_area("Testo", tutti_gli_articoli[idx]['testo'], height=300)
+                edit_tit = st.text_input("Titolo attuale", tutti_gli_articoli[idx]['titolo'])
+                edit_tes = st.text_area("Testo attuale", tutti_gli_articoli[idx]['testo'], height=300)
                 if st.button("💾 Salva Modifiche"):
                     tutti_gli_articoli[idx]['titolo'] = edit_tit
                     tutti_gli_articoli[idx]['testo'] = edit_tes
                     salva_tutti_articoli(tutti_gli_articoli)
-                    st.success("Aggiornato!")
-                    st.rerun()
-
-        with st.expander("🗑️ ELIMINA ARTICOLI"):
-            for i, a in enumerate(tutti_gli_articoli):
-                c1, c2 = st.columns([0.8, 0.2])
-                c1.write(a['titolo'])
-                if c2.button("Elimina", key=f"del_{i}"):
-                    nuova_lista = [art for j, art in enumerate(tutti_gli_articoli) if i != j]
-                    salva_tutti_articoli(nuova_lista)
+                    st.success("Aggiornato con successo!")
                     st.rerun()
 
         if st.button("🔒 Esci"):
             st.session_state['admin'] = False
             st.rerun()
 
-    # VISUALIZZAZIONE ARTICOLO (FIXATA)
+    # VISUALIZZAZIONE ARTICOLO
     art = st.session_state['articolo_selezionato'] if st.session_state['articolo_selezionato'] else (tutti_gli_articoli[0] if tutti_gli_articoli else None)
     if art:
         testo_html = art['testo'].replace('\n', '<br>')
@@ -171,40 +155,4 @@ with col_main:
         <div class="article-box">
             <h1 style='font-family:serif; color:#1A2E44; margin-top:0; margin-bottom:10px;'>{art['titolo']}</h1>
             <p style='font-style:italic; color:#C5A059; margin-bottom:30px;'>{art['data']} • Luca Valenti</p>
-            <div style="font-family:serif; font-size:1.3rem; line-height:1.8; color:#1A2E44; display:block;">
-                {testo_html}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.write("Benvenuti su Sorgente Yoga.")
-
-with col_nav:
-    st.markdown("### 🏛️ BIBLIOTECA")
-    
-    st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_archivio}" class="icon-img"><span class="icon-text">ARCHIVIO BLOG</span></div>', unsafe_allow_html=True)
-    with st.expander("Sfoglia articoli", expanded=True):
-        if tutti_gli_articoli:
-            for i, a in enumerate(tutti_gli_articoli):
-                if st.button(f"📄 {a['titolo']}", key=f"nav_{i}"):
-                    st.session_state['articolo_selezionato'] = a
-                    st.rerun()
-        else:
-            st.caption("Vuoto.")
-
-    st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_testi}" class="icon-img"><span class="icon-text">TESTI CLASSICI</span></div>', unsafe_allow_html=True)
-    with st.expander("Elenco testi"):
-        st.write("• Yoga Sūtra (Patañjali)")
-        st.write("• Haṭha Yoga Pradīpikā")
-        st.write("• Gheraṇḍa Saṃhitā")
-        st.write("• Bhagavad Gītā")
-
-    st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_storia}" class="icon-img"><span class="icon-text">RICERCA STORICA</span></div>', unsafe_allow_html=True)
-    with st.expander("Siti e Progetti"):
-        st.markdown('<a class="resource-link" href="http://hyp.soas.ac.uk/" target="_blank">Hatha Yoga Project ↗</a>', unsafe_allow_html=True)
-        st.markdown('<a class="resource-link" href="https://journalofyogastudies.org/index.php/JoYS/issue/archive" target="_blank">Journal of Yoga Studies ↗</a>', unsafe_allow_html=True)
-
-    st.markdown(f'<div class="icon-title-container"><img src="data:image/png;base64,{icon_scienza}" class="icon-img"><span class="icon-text">SCIENZA</span></div>', unsafe_allow_html=True)
-    with st.expander("Istituti e Ricerche"):
-        st.markdown('<a class="resource-link" href="https://sleep.hms.harvard.edu/faculty-staff/sat-bir-singh-khalsa" target="_blank">Harvard (Dr. Khalsa) ↗</a>', unsafe_allow_html=True)
-        st.markdown('<a class="resource-link" href="https://www.iayt.org/" target="_blank">IAYT Yoga Therapy ↗</a>', unsafe_allow_html=True)
+            <div style="font-family:serif; font-size:1.2rem; line-height:1.7; color:#1A2E44
