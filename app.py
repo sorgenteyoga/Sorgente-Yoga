@@ -39,22 +39,57 @@ icon_scienza = get_base64_image("icona_scienza.png")
 # --- CSS ---
 st.markdown(f"""
     <style>
+ # --- CSS RESPONSIVE ---
+st.markdown(f"""
+    <style>
     .stApp {{ background-color: #FDFCF0; }}
-    .block-container {{ padding-top: 1rem !important; padding-bottom: 1rem !important; max-width: 95%; }}
+    
+    /* Layout generale */
+    .block-container {{ 
+        padding-top: 1rem !important; 
+        padding-bottom: 1rem !important; 
+        max-width: 95%; 
+    }}
+
+    /* Header adattivo */
     .header-container {{ width: 100%; background-color: #FDFCF0; border-bottom: 3px solid #C5A059; margin-bottom: 25px; }}
     .header-image {{ 
-        width: 100%; height: 180px; 
+        width: 100%; height: 120px; /* Ridotto per mobile */
         background-image: url('data:image/png;base64,{img_header}'); 
         background-size: contain; background-repeat: no-repeat; background-position: center; 
-        background-color: #FDFCF0; box-sizing: border-box; padding: 15px; 
     }}
-    .header-title-bar {{ background-color: #1A2E44; padding: 12px; color: #FDFCF0; font-family: 'serif'; font-size: 1.7rem; letter-spacing: 3px; text-align: center; }}
-    .article-box {{ background-color: white; padding: 40px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-top: 10px; min-height: 300px; }}
+    .header-title-bar {{ 
+        background-color: #1A2E44; padding: 10px; color: #FDFCF0; 
+        font-family: 'serif'; font-size: 1.2rem; /* Font più piccolo per mobile */
+        letter-spacing: 2px; text-align: center; 
+    }}
+
+    /* Box Articolo adattivo */
+    .article-box {{ 
+        background-color: white; 
+        padding: 20px; /* Meno spazio interno su mobile */
+        border-radius: 5px; 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+        margin-top: 10px; 
+    }}
+
+    /* Ottimizzazione testo per schermi piccoli */
+    @media (max-width: 768px) {{
+        .header-image {{ height: 80px; }}
+        .header-title-bar {{ font-size: 1rem; letter-spacing: 1px; }}
+        .article-box {{ padding: 15px; }}
+        h1 {{ font-size: 1.5rem !important; }} /* Titoli più piccoli sul telefono */
+        div {{ font-size: 1.1rem !important; }} /* Testo leggibile ma non gigante */
+    }}
+
     .icon-title-container {{ display: flex; align-items: center; gap: 12px; margin-top: 25px; margin-bottom: 10px; }}
-    .icon-img {{ width: 30px; height: 30px; object-fit: contain; }}
-    .icon-text {{ font-weight: bold; color: #1A2E44; font-family: 'serif'; font-size: 1.1rem; letter-spacing: 1px;}}
+    .icon-img {{ width: 25px; height: 25px; object-fit: contain; }}
+    .icon-text {{ font-weight: bold; color: #1A2E44; font-family: 'serif'; font-size: 1rem; }}
     .resource-link {{ text-decoration: none; color: #1A2E44 !important; font-weight: bold; display: block; padding: 8px 0; border-bottom: 1px solid #eee; }}
+    
     #MainMenu, footer, header {{visibility: hidden;}}
+    </style>
+    """, unsafe_allow_html=True)
     </style>
     <div class="header-container">
         <div class="header-image"></div>
