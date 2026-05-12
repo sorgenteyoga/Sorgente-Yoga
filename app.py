@@ -1,4 +1,3 @@
-
 import streamlit as st
 import base64
 import os
@@ -71,7 +70,6 @@ tutti_gli_articoli = carica_articoli()
 col_main, col_nav = st.columns([0.7, 0.3], gap="large")
 
 with col_main:
-    # AREA ACCESSO
     if not st.session_state['admin']:
         with st.expander("🔑 Area Autore"):
             pwd = st.text_input("Password", type="password")
@@ -79,11 +77,9 @@ with col_main:
                 st.session_state['admin'] = True
                 st.rerun()
     
-    # AREA EDITORE
     if st.session_state['admin']:
         st.info("✍️ MODALITÀ EDITORE")
         
-        # --- FUNZIONE DI BACKUP ---
         if tutti_gli_articoli:
             json_string = json.dumps(tutti_gli_articoli, ensure_ascii=False, indent=4)
             st.download_button(
@@ -129,21 +125,7 @@ with col_main:
             st.session_state['admin'] = False
             st.rerun()
 
-    # VISUALIZZAZIONE ARTICOLO
     art = st.session_state['articolo_selezionato'] if st.session_state['articolo_selezionato'] else (tutti_gli_articoli[0] if tutti_gli_articoli else None)
     if art:
-        # Trasformiamo i ritorni a capo in tag HTML per la visualizzazione fedele
         testo_visualizzato = art['testo'].replace('\n', '<br>')
-        st.markdown(f"""
-        <div class="article-box">
-            <h1 style='font-family:serif; color:#1A2E44; margin-top:0; margin-bottom:10px;'>{art['titolo']}</h1>
-            <p style='font-style:italic; color:#C5A059; margin-bottom:30px;'>{art['data']} • Luca Valenti</p>
-            <div style="font-family:serif; font-size:1.3rem; line-height:1.8; color:#1A2E44; display:block;">
-                {testo_visualizzato}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.write("Benvenuti su Sorgente Yoga.")
-
-# (Il resto della colonna col_nav rimane uguale...)
+        st.markdown(
