@@ -46,7 +46,7 @@ def get_img(p):
         except: return ""
     return ""
 
-# --- INTERFACCIA E CSS CHIRURGICO PER HOVER ---
+# --- INTERFACCIA E CSS "POPOVER-CLEANER" ---
 all_a = load_a()
 ih = get_img("header_yoga.png")
 
@@ -65,42 +65,43 @@ st.markdown(f"""<style>
     
     .art-box {{ background: white; padding:30px; border-radius:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color:#1A2E44; min-height:500px; }}
 
-    /* 1. TASTI PRINCIPALI (NON TOCCARE FORMA) */
+    /* TASTI MENU (QUELLI CHE VANNO BENE) */
     div[data-testid="stPopover"] button[kind="secondary"] {{
         background: transparent !important; border: none !important; color: #1A2E44 !important;
         text-align: left !important; padding: 5px 0px !important; font-size: 1.1rem !important; justify-content: flex-start !important;
     }}
 
-    /* 2. LOGICA HOVER: MOSTRA TENDINA AL PASSAGGIO DEL MOUSE */
-    div[data-testid="stPopover"]:hover > div[data-testid="stPopoverContent"] {{
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-    }}
-
-    /* 3. STILE TENDINA STRETTA E PULITA */
-    div[data-testid="stPopoverContent"] {{
-        background-color: #FDFCF0 !important; /* Leggero sfondo per leggere meglio i titoli */
-        border: 1px solid #C5A059 !important;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.1) !important;
-        min-width: 150px !important;
-        max-width: 220px !important; /* TENDINA MOLTO STRETTA */
-        padding: 10px !important;
-    }}
+    /* --- PULIZIA TOTALE TENDINA --- */
     
-    div[data-testid="stPopoverBody"] {{ background-color: transparent !important; }}
+    /* Rimuove cornicetta, ombra e forza larghezza stretta */
+    div[data-testid="stPopoverContent"] {{
+        background-color: #FDFCF0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        min-width: 150px !important;
+        max-width: 250px !important;
+        padding: 5px !important;
+    }}
 
-    /* Titoli dentro la tendina */
+    /* Rimuove la freccetta (triangolo) */
+    div[data-testid="stPopoverContent"] > div {{ border: none !important; }}
+    
+    /* Rimuove i bordi interni di Streamlit */
+    [data-testid="stPopoverBody"] {{
+        border: none !important;
+        background-color: transparent !important;
+    }}
+
+    /* Stile titoli dentro la tendina */
     div[data-testid="stPopoverContent"] button {{
         background: transparent !important;
         border: none !important;
         color: #1A2E44 !important;
-        padding: 5px 0px !important;
+        padding: 4px 0px !important;
         font-family: serif !important;
-        font-size: 0.95rem !important;
-        justify-content: flex-start !important;
+        font-size: 1rem !important;
         width: 100% !important;
-        line-height: 1.2 !important;
+        box-shadow: none !important;
     }}
 
     div[data-testid="stPopoverContent"] button:hover {{
@@ -108,13 +109,12 @@ st.markdown(f"""<style>
         text-decoration: underline !important;
     }}
 
-    /* Nasconde freccia di default */
+    /* Nasconde definitivamente la freccia in alto */
     div[data-testid="stPopoverContent"] > div:first-child {{ display: none !important; }}
 
     @media (max-width: 768px) {{
         .header-img {{ height: 80px !important; background-size: cover !important; }}
         .header-bar {{ font-size: 1.1rem !important; padding: 10px !important; }}
-        div[data-testid="column"]:first-child {{ display: none !important; }}
     }}
 </style>
 <div class="header-img"></div>
