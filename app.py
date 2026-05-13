@@ -46,20 +46,16 @@ def get_img(p):
         except: return ""
     return ""
 
-# --- INTERFACCIA E CSS ADATTIVO (MOBILE FRIENDLY) ---
+# --- INTERFACCIA E CSS ---
 all_a = load_a()
 ih = get_img("header_yoga.png")
 
 st.markdown(f"""<style>
     .stApp {{ background-color: #FDFCF0 !important; }}
     
-    /* Intestazione Standard (PC) */
     .header-img {{ 
-        width:100%; 
-        height:120px; 
-        background: url('data:image/png;base64,{ih}') no-repeat center; 
-        background-size: contain; 
-        border-bottom: 3px solid #C5A059; 
+        width:100%; height:120px; background: url('data:image/png;base64,{ih}') no-repeat center; 
+        background-size: contain; border-bottom: 3px solid #C5A059; 
     }}
     
     .header-bar {{ 
@@ -68,19 +64,41 @@ st.markdown(f"""<style>
     }}
     
     .art-box {{ background: white; padding:30px; border-radius:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color:#1A2E44; min-height:500px; }}
-    
-    div[data-testid="stPopover"] button[kind="secondary"] {{
-        background: transparent !important; border: none !important; color: #1A2E44 !important;
-        text-align: left !important; padding: 5px 0px !important; font-size: 1.1rem !important; justify-content: flex-start !important;
+
+    /* PERSONALIZZAZIONE TENDINE (POPOVER) */
+    div[data-testid="stPopoverContent"] {{
+        background-color: white !important;
+        border: none !important;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.1) !important;
+        padding: 10px !important;
+        min-width: 180px !important;
     }}
-    div[data-testid="stPopover"] button[kind="secondary"]:hover {{ color: #C5A059 !important; text-decoration: underline !important; }}
+    
+    /* Rimuove cornice interna e freccette di Streamlit */
+    div[data-testid="stPopoverContent"] > div {{
+        border: none !important;
+        padding: 0 !important;
+    }}
+
+    /* Stile titoli articoli dentro il menu */
+    div[data-testid="stPopoverContent"] button {{
+        background: transparent !important;
+        border: none !important;
+        color: #1A2E44 !important;
+        text-align: left !important;
+        font-size: 0.95rem !important; /* Testo più piccolo e discreto */
+        padding: 4px 0px !important;
+        justify-content: flex-start !important;
+    }}
+    
+    div[data-testid="stPopoverContent"] button:hover {{
+        color: #C5A059 !important;
+        text-decoration: underline !important;
+    }}
 
     /* OTTIMIZZAZIONE PER CELLULARI */
     @media (max-width: 768px) {{
-        .header-img {{ 
-            height: 80px !important; /* Aumenta l'altezza minima su cellulare */
-            background-size: cover !important; /* L'immagine riempie meglio lo spazio senza rimpicciolirsi troppo */
-        }}
+        .header-img {{ height: 80px !important; background-size: cover !important; }}
         .header-bar {{ font-size: 1.1rem !important; letter-spacing: 1px !important; padding: 10px !important; }}
         .art-box {{ padding: 20px !important; }}
         .art-box h1 {{ font-size: 1.4rem !important; line-height: 1.2 !important; }}
