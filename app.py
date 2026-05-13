@@ -46,7 +46,7 @@ def get_img(p):
         except: return ""
     return ""
 
-# --- INTERFACCIA E CSS CHIRURGICO ---
+# --- INTERFACCIA E CSS CHIRURGICO PER HOVER ---
 all_a = load_a()
 ih = get_img("header_yoga.png")
 
@@ -65,40 +65,50 @@ st.markdown(f"""<style>
     
     .art-box {{ background: white; padding:30px; border-radius:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color:#1A2E44; min-height:500px; }}
 
-    /* 1. TASTI PRINCIPALI (NON TOCCARE) */
+    /* 1. TASTI PRINCIPALI (NON TOCCARE FORMA) */
     div[data-testid="stPopover"] button[kind="secondary"] {{
         background: transparent !important; border: none !important; color: #1A2E44 !important;
         text-align: left !important; padding: 5px 0px !important; font-size: 1.1rem !important; justify-content: flex-start !important;
     }}
-    div[data-testid="stPopover"] button[kind="secondary"]:hover {{ color: #C5A059 !important; text-decoration: underline !important; }}
 
-    /* 2. SOLO INTERNO TENDINA (MODIFICA CHIRURGICA) */
-    /* Rende il guscio invisibile e stretto */
+    /* 2. LOGICA HOVER: MOSTRA TENDINA AL PASSAGGIO DEL MOUSE */
+    div[data-testid="stPopover"]:hover > div[data-testid="stPopoverContent"] {{
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }}
+
+    /* 3. STILE TENDINA STRETTA E PULITA */
     div[data-testid="stPopoverContent"] {{
-        background-color: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-        min-width: 180px !important;
-        max-width: 250px !important;
+        background-color: #FDFCF0 !important; /* Leggero sfondo per leggere meglio i titoli */
+        border: 1px solid #C5A059 !important;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.1) !important;
+        min-width: 150px !important;
+        max-width: 220px !important; /* TENDINA MOLTO STRETTA */
+        padding: 10px !important;
     }}
     
-    /* Forza lo sfondo trasparente anche nel corpo */
     div[data-testid="stPopoverBody"] {{ background-color: transparent !important; }}
 
-    /* Trasforma i bottoni DENTRO la tendina in testo semplice */
+    /* Titoli dentro la tendina */
     div[data-testid="stPopoverContent"] button {{
         background: transparent !important;
         border: none !important;
-        box-shadow: none !important;
         color: #1A2E44 !important;
-        padding: 2px 0px !important;
+        padding: 5px 0px !important;
         font-family: serif !important;
-        font-size: 1rem !important;
+        font-size: 0.95rem !important;
         justify-content: flex-start !important;
         width: 100% !important;
+        line-height: 1.2 !important;
     }}
 
-    /* Nasconde la freccia e i bordi extra di Streamlit */
+    div[data-testid="stPopoverContent"] button:hover {{
+        color: #C5A059 !important;
+        text-decoration: underline !important;
+    }}
+
+    /* Nasconde freccia di default */
     div[data-testid="stPopoverContent"] > div:first-child {{ display: none !important; }}
 
     @media (max-width: 768px) {{
