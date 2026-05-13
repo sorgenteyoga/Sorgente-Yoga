@@ -52,7 +52,15 @@ ih = get_img("header_yoga.png")
 
 st.markdown(f"""<style>
     .stApp {{ background-color: #FDFCF0 !important; }}
-    .header-img {{ width:100%; height:100px; background: url('data:image/png;base64,{ih}') no-repeat center; background-size: contain; border-bottom: 3px solid #C5A059; }}
+    
+    /* Intestazione Standard (PC) */
+    .header-img {{ 
+        width:100%; 
+        height:120px; 
+        background: url('data:image/png;base64,{ih}') no-repeat center; 
+        background-size: contain; 
+        border-bottom: 3px solid #C5A059; 
+    }}
     
     .header-bar {{ 
         background:#1A2E44; padding:15px; color:#FDFCF0; font-family: serif; 
@@ -61,7 +69,6 @@ st.markdown(f"""<style>
     
     .art-box {{ background: white; padding:30px; border-radius:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color:#1A2E44; min-height:500px; }}
     
-    /* Stile bottoni invisibili nelle tendine */
     div[data-testid="stPopover"] button[kind="secondary"] {{
         background: transparent !important; border: none !important; color: #1A2E44 !important;
         text-align: left !important; padding: 5px 0px !important; font-size: 1.1rem !important; justify-content: flex-start !important;
@@ -70,10 +77,13 @@ st.markdown(f"""<style>
 
     /* OTTIMIZZAZIONE PER CELLULARI */
     @media (max-width: 768px) {{
+        .header-img {{ 
+            height: 80px !important; /* Aumenta l'altezza minima su cellulare */
+            background-size: cover !important; /* L'immagine riempie meglio lo spazio senza rimpicciolirsi troppo */
+        }}
         .header-bar {{ font-size: 1.1rem !important; letter-spacing: 1px !important; padding: 10px !important; }}
-        .art-box {{ padding: 15px !important; }}
-        .art-box h1 {{ font-size: 1.4rem !important; }}
-        /* Nascondiamo la colonna "vuoto" su mobile per recuperare spazio */
+        .art-box {{ padding: 20px !important; }}
+        .art-box h1 {{ font-size: 1.4rem !important; line-height: 1.2 !important; }}
         div[data-testid="column"]:first-child {{ display: none !important; }}
     }}
 </style>
@@ -84,7 +94,6 @@ if 'sel_idx' not in st.session_state: st.session_state['sel_idx'] = 0 if all_a e
 if 'mode' not in st.session_state: st.session_state['mode'] = "view"
 
 # --- NAVIGAZIONE ---
-# Su PC usa lo spazio vuoto, su Mobile il CSS sopra lo nasconde
 vuoto, c1, c2, c3 = st.columns([0.15, 0.25, 0.25, 0.25])
 
 with c1:
