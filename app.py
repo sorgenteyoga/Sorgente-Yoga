@@ -46,9 +46,6 @@ def get_img(p):
         except: return ""
     return ""
 
-# --- INTERFACCIA E CSS ADATTIVO (MOBILE FRIENDLY) ---
-all_a = load_a()
-ih = get_img("header_yoga.png")
 # --- INTERFACCIA E CSS ADATTIVO ---
 all_a = load_a()
 ih = get_img("header_yoga.png")
@@ -106,9 +103,6 @@ st.markdown(f"""<style>
 </style>
 <div class="header-img"></div>
 <div class="header-bar">S O R G E N T E &nbsp; Y O G A</div>""", unsafe_allow_html=True)
-<div class="header-img"></div>
-<div class="header-bar">S O R G E N T E &nbsp; Y O G A</div>""", unsafe_allow_html=True)
-
 if 'sel_idx' not in st.session_state: st.session_state['sel_idx'] = 0 if all_a else None
 if 'mode' not in st.session_state: st.session_state['mode'] = "view"
 
