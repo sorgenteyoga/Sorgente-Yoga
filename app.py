@@ -11,32 +11,41 @@ def get_img(p):
         except: return ""
     return ""
 
+def load_a():
+    if os.path.exists("archivio_articoli.json"):
+        try:
+            with open("archivio_articoli.json", "r", encoding="utf-8") as f:
+                return json.load(f)
+        except: return []
+    return []
+
+all_a = load_a()
 ih = get_img("header_yoga.png")
 
-# --- CSS RADICALE PER ELIMINARE GLI SPAZI BIANCHI ---
+# --- CSS DEFINITIVO PER COPIARE "COME DOVREBBE.JPG" ---
 st.markdown(f"""
 <style>
-    /* 1. ELIMINA LA BARRA DI SISTEMA IN ALTO E I SUOI MARGINI */
-    header[data-testid="stHeader"] {{
+    /* 1. ELIMINA LO SPAZIO BIANCO IN ALTO (HEADER DI SISTEMA) */
+    [data-testid="stHeader"] {{
         display: none !important;
     }}
     
-    /* 2. AZZERA TUTTI I PADDING DEL CONTENITORE PRINCIPALE */
+    /* 2. AZZERA MARGINI E PADDING DEL CONTENITORE PRINCIPALE */
     .block-container {{
         padding: 0px !important;
         margin: 0px !important;
         max-width: 100% !important;
     }}
 
-    /* 3. RIMUOVE LO SPAZIO BIANCO EXTRA IN CIMA */
+    /* 3. FORZA L'APP A PARTIRE DA ZERO */
     .stApp {{
         margin-top: -60px !important;
     }}
 
-    /* 4. IMMAGINE: FULL WIDTH E ALTEZZA MAGGIORE */
+    /* 4. IMMAGINE HEADER: GRANDE, FULL-WIDTH E SENZA SPAZI */
     .header-img {{ 
         width: 100vw; 
-        height: 380px; /* Qui puoi aumentare ancora se la vuoi più grande */
+        height: 380px; 
         background: url('data:image/png;base64,{ih}') no-repeat center; 
         background-size: cover; 
         margin: 0px !important;
@@ -44,35 +53,76 @@ st.markdown(f"""
         display: block;
     }}
     
-    /* 5. BARRA BLU: ATTACCATA ALL'IMMAGINE (MARGIN-TOP 0) */
+    /* 5. BARRA BLU: INCOLLATA ALL'IMMAGINE */
     .header-bar {{ 
         background:#1A2E44 !important; 
-        padding:30px 10px; 
+        padding:25px 10px; 
         color:#FDFCF0 !important; 
         font-family: serif; 
         text-align:center; 
         font-size:2.2rem; 
         letter-spacing:5px; 
-        margin-top: -5px !important; /* Piccola correzione per eliminare micro-spazi */
+        margin-top: -2px !important; /* Salda l'immagine alla barra */
         border-bottom: 5px solid #C5A059;
         text-transform: uppercase;
     }}
 
-    /* 6. CORPO DEL SITO: RIPRISTINA I MARGINI SOLO PER IL TESTO */
-    .content-wrapper {{
-        padding: 40px 10%;
+    /* 6. CORPO DEL SITO: SPAZIATURA ELEGANTE PER TESTO E TASTI */
+    .main-wrapper {{
+        padding: 40px 8%;
         background-color: #FDFCF0;
+    }}
+
+    /* 7. SCATOLA ARTICOLO */
+    .art-box {{ 
+        background: white; padding:40px; border-radius:8px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08); color:#1A2E44; 
     }}
 </style>
 
 <div class="header-img"></div>
-<div class="header-bar">Sorgente Yoga</div>
+<div class="header-bar">SORGENTE YOGA</div>
 """, unsafe_allow_html=True)
 
-# Tutto ciò che segue va dentro questo "wrapper" per non stare attaccato ai bordi dello schermo
-st.markdown('<div class="content-wrapper">', unsafe_allow_html=True)
+# Inizio area contenuti
+st.markdown('<div class="main-wrapper">', unsafe_allow_html=True)
 
-# Qui metti il resto del codice per i menu e gli articoli...
-st.info("Carica l'altra immagine per sistemare i tasti del menu!")
+if 'sel_idx' not in st.session_state: st.session_state['sel_idx'] = 0 if all_a else None
+if 'mode' not in st.session_state: st.session_state['mode'] = 'view'
+
+# Navigazione a 3 colonne come nel tuo schizzo
+c1, c2, c3 = st.columns(3)
+with c1:
+    with st.popover("📂 ARCHIVIO", use_container_width=True):
+        for i, a in enumerate(all_a):
+            if str(a.get('cat','')).upper() in ['BLOG', '']:
+                if st.button(a['titolo'], key=f"ar_{i}", use_container_width=True):
+                    st.session_state.update({"sel_idx": i, "mode": "view"}); st.rerun()
+with c2:
+    with st.popover("📜 TESTI ANTICHI", use_container_width=True):
+        for i, a in enumerate(all_a):
+            if str(a.get('cat','')).upper() == 'TESTI':
+                if st.button(a['titolo'], key=f"te_{i}", use_container_width=True):
+                    st.session_state.update({"sel_idx": i, "mode": "view"}); st.rerun()
+with c3:
+    with st.popover("🔬 SCIENZA", use_container_width=True):
+        for i, a in enumerate(all_a):
+            if str(a.get('cat','')).upper() == 'SCIENZA':
+                if st.button(a['titolo'], key=f"sc_{i}", use_container_width=True):
+                    st.session_state.update({"sel_idx": i, "mode": "view"}); st.rerun()
+
+st.write("---")
+
+# Visualizzazione Contenuto
+s_idx = st.session_state['sel_idx']
+if st.session_state.mode == "view" and s_idx is not None:
+    art = all_a[s_idx]
+    st.markdown(f"""<div class="art-box">
+        <h1 style="font-family:serif; color:#1A2E44; margin-top:0;">{art['titolo']}</h1>
+        <p style="color:#C5A059; font-style:italic;">{art['data']}</p>
+        <div style="font-size:1.2rem; line-height:1.7; font-family:serif;">
+            {art['testo'].replace(chr(10), '<br>')}
+        </div>
+    </div>""", unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
