@@ -46,45 +46,62 @@ def get_img(p):
         except: return ""
     return ""
 
-# --- INTERFACCIA E CSS ADATTIVO (MOBILE FRIENDLY) ---
+# --- INTERFACCIA E CSS ---
 all_a = load_a()
 ih = get_img("header_yoga.png")
 
 st.markdown(f"""<style>
     .stApp {{ background-color: #FDFCF0 !important; }}
+    .header-img {{ width:100%; height:120px; background: url('data:image/png;base64,{ih}') no-repeat center; background-size: contain; border-bottom: 3px solid #C5A059; }}
+    .header-bar {{ background:#1A2E44; padding:15px; color:#FDFCF0; font-family: serif; text-align:center; font-size:1.6rem; letter-spacing:2px; margin-bottom:20px; }}
     
-    /* Intestazione Standard (PC) */
-    .header-img {{ 
-        width:100%; 
-        height:120px; 
-        background: url('data:image/png;base64,{ih}') no-repeat center; 
-        background-size: contain; 
-        border-bottom: 3px solid #C5A059; 
-    }}
-    
-    .header-bar {{ 
-        background:#1A2E44; padding:15px; color:#FDFCF0; font-family: serif; 
-        text-align:center; font-size:1.6rem; letter-spacing:2px; margin-bottom:20px; 
-    }}
-    
+    /* Area Contenuto */
     .art-box {{ background: white; padding:30px; border-radius:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color:#1A2E44; min-height:500px; }}
-    
-    div[data-testid="stPopover"] button[kind="secondary"] {{
-        background: transparent !important; border: none !important; color: #1A2E44 !important;
-        text-align: left !important; padding: 5px 0px !important; font-size: 1.1rem !important; justify-content: flex-start !important;
-    }}
-    div[data-testid="stPopover"] button[kind="secondary"]:hover {{ color: #C5A059 !important; text-decoration: underline !important; }}
 
-    /* OTTIMIZZAZIONE PER CELLULARI */
+    /* POP OVER MINIMALE DI FIANCO */
+    div[data-testid="stPopover"] {{
+        position: relative;
+    }}
+
+    /* Rimuove cornice e sposta il menu a destra del tasto */
+    div[data-testid="stPopoverContent"] {{
+        background-color: white !important;
+        border: none !important;
+        box-shadow: 5px 5px 15px rgba(0,0,0,0.08) !important;
+        min-width: 200px !important;
+        padding: 10px !important;
+        margin-left: 105% !important; /* Lo sposta di fianco */
+        margin-top: -45px !important; /* Lo alinea all'altezza del tasto */
+    }}
+
+    /* Bottoni interni (Titoli articoli) */
+    div[data-testid="stPopoverContent"] button {{
+        background: transparent !important;
+        border: none !important;
+        color: #1A2E44 !important;
+        text-align: left !important;
+        font-size: 0.9rem !important; /* Più piccolo */
+        padding: 2px 0px !important;
+        margin: 0 !important;
+    }}
+    div[data-testid="stPopoverContent"] button:hover {{
+        color: #C5A059 !important;
+        text-decoration: underline !important;
+    }}
+
+    /* Nasconde la freccetta del popover */
+    div[data-testid="stPopoverContent"]::before, div[data-testid="stPopoverContent"]::after {{
+        display: none !important;
+    }}
+
+    /* OTTIMIZZAZIONE MOBILE */
     @media (max-width: 768px) {{
-        .header-img {{ 
-            height: 80px !important; /* Aumenta l'altezza minima su cellulare */
-            background-size: cover !important; /* L'immagine riempie meglio lo spazio senza rimpicciolirsi troppo */
+        div[data-testid="stPopoverContent"] {{
+            margin-left: 0 !important;
+            margin-top: 0 !important;
+            width: 100% !important;
         }}
-        .header-bar {{ font-size: 1.1rem !important; letter-spacing: 1px !important; padding: 10px !important; }}
-        .art-box {{ padding: 20px !important; }}
-        .art-box h1 {{ font-size: 1.4rem !important; line-height: 1.2 !important; }}
-        div[data-testid="column"]:first-child {{ display: none !important; }}
+        .header-bar {{ font-size: 1.1rem !important; }}
     }}
 </style>
 <div class="header-img"></div>
@@ -94,7 +111,8 @@ if 'sel_idx' not in st.session_state: st.session_state['sel_idx'] = 0 if all_a e
 if 'mode' not in st.session_state: st.session_state['mode'] = "view"
 
 # --- NAVIGAZIONE ---
-vuoto, c1, c2, c3 = st.columns([0.15, 0.25, 0.25, 0.25])
+# Usiamo colonne più strette per i tasti principali
+vuoto, c1, c2, c3, c_rest = st.columns([0.1, 0.15, 0.15, 0.15, 0.45])
 
 with c1:
     with st.popover("📂 ARCHIVIO", use_container_width=True):
@@ -104,7 +122,7 @@ with c1:
                 st.session_state['sel_idx'] = idx; st.session_state['mode'] = "view"; st.rerun()
 
 with c2:
-    with st.popover("📜 TESTI ANTICHI", use_container_width=True):
+    with st.popover("📜 TESTI", use_container_width=True):
         testi_list = [(i, a) for i, a in enumerate(all_a) if str(a.get('cat','')).upper() == 'TESTI']
         for idx, a in testi_list:
             if st.button(a['titolo'], key=f"t_{idx}", use_container_width=True):
