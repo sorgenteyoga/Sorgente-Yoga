@@ -46,62 +46,61 @@ def get_img(p):
         except: return ""
     return ""
 
-# --- INTERFACCIA E CSS ---
+# --- INTERFACCIA E CSS DEFINITIVO ---
 all_a = load_a()
 ih = get_img("header_yoga.png")
 
 st.markdown(f"""<style>
+    /* Sfondo Generale */
     .stApp {{ background-color: #FDFCF0 !important; }}
     
+    /* Header */
     .header-img {{ 
         width:100%; height:120px; background: url('data:image/png;base64,{ih}') no-repeat center; 
         background-size: contain; border-bottom: 3px solid #C5A059; 
     }}
-    
     .header-bar {{ 
         background:#1A2E44; padding:15px; color:#FDFCF0; font-family: serif; 
         text-align:center; font-size:1.6rem; letter-spacing:2px; margin-bottom:20px; 
     }}
     
+    /* Box Articolo */
     .art-box {{ background: white; padding:30px; border-radius:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color:#1A2E44; min-height:500px; }}
 
-    /* --- AZZERAMENTO TOTALE TENDINA (STILE "SI") --- */
-    /* 1. Rende invisibile il contenitore del popover (guscio bianco e ombra) */
-    div[data-testid="stPopoverContent"], 
-    div[data-testid="stPopoverBody"],
-    div[data-testid="stPopoverContent"] > div {{
-        background-color: transparent !important;
+    /* --- PULIZIA TENDINE (STILE "SI") --- */
+    /* Rimuove cornice, ombra e sfondo dai popover */
+    div[data-testid="stPopoverContent"] {{
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
     }}
-
-    /* 2. Trasforma i bottoni in puro testo cliccabile */
-    div[data-testid="stPopoverContent"] button {{
-        background-color: transparent !important;
+    
+    /* Rimuove lo sfondo bianco interno al fumetto */
+    div[data-testid="stPopoverBody"] {{
         background: transparent !important;
         border: none !important;
-        box-shadow: none !important;
+    }}
+
+    /* Trasforma i bottoni della lista in testo semplice */
+    div[data-testid="stPopoverContent"] button {{
+        background: transparent !important;
+        border: none !important;
         color: #1A2E44 !important;
-        padding: 4px 0px !important;
-        margin: 0px !important;
+        padding: 5px 0px !important;
         text-align: left !important;
-        font-size: 1.1rem !important;
         font-family: serif !important;
+        font-size: 1.1rem !important;
         justify-content: flex-start !important;
         min-height: 0px !important;
-        display: block !important;
-        width: 100% !important;
     }}
 
-    /* 3. Effetto Hover (Oro e Sottolineato) */
+    /* Effetto Hover (Oro) */
     div[data-testid="stPopoverContent"] button:hover {{
         color: #C5A059 !important;
         text-decoration: underline !important;
-        background: transparent !important;
     }}
 
-    /* 4. Nasconde la freccetta in alto del fumetto */
+    /* Nasconde la punta del fumetto */
     div[data-testid="stPopoverContent"] > div:first-child {{
         display: none !important;
     }}
@@ -109,7 +108,6 @@ st.markdown(f"""<style>
     @media (max-width: 768px) {{
         .header-img {{ height: 80px !important; background-size: cover !important; }}
         .header-bar {{ font-size: 1.1rem !important; letter-spacing: 1px !important; padding: 10px !important; }}
-        .art-box {{ padding: 20px !important; }}
         div[data-testid="column"]:first-child {{ display: none !important; }}
     }}
 </style>
@@ -120,24 +118,25 @@ if 'sel_idx' not in st.session_state: st.session_state['sel_idx'] = 0 if all_a e
 if 'mode' not in st.session_state: st.session_state['mode'] = "view"
 
 # --- NAVIGAZIONE ---
-vuoto, c1, c2, c3 = st.columns([0.15, 0.25, 0.25, 0.25])
+# Ho aggiunto un piccolo spazio tra le colonne per evitare che si "pestino" i piedi
+vuoto, c1, c2, c3 = st.columns([0.1, 0.3, 0.3, 0.3])
 
 with c1:
-    with st.popover("📂 ARCHIVIO", use_container_width=True):
+    with st.popover("📂 ARCHIVIO"):
         blog_list = [(i, a) for i, a in enumerate(all_a) if str(a.get('cat','')).upper() == 'BLOG' or not a.get('cat')]
         for idx, a in blog_list:
             if st.button(a['titolo'], key=f"b_{idx}", use_container_width=True):
                 st.session_state['sel_idx'] = idx; st.session_state['mode'] = "view"; st.rerun()
 
 with c2:
-    with st.popover("📜 TESTI ANTICHI", use_container_width=True):
+    with st.popover("📜 TESTI ANTICHI"):
         testi_list = [(i, a) for i, a in enumerate(all_a) if str(a.get('cat','')).upper() == 'TESTI']
         for idx, a in testi_list:
             if st.button(a['titolo'], key=f"t_{idx}", use_container_width=True):
                 st.session_state['sel_idx'] = idx; st.session_state['mode'] = "view"; st.rerun()
 
 with c3:
-    with st.popover("🔬 SCIENZA", use_container_width=True):
+    with st.popover("🔬 SCIENZA"):
         sci_list = [(i, a) for i, a in enumerate(all_a) if str(a.get('cat','')).upper() == 'SCIENZA']
         for idx, a in sci_list:
             if st.button(a['titolo'], key=f"s_{idx}", use_container_width=True):
