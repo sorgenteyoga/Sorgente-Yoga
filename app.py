@@ -46,20 +46,16 @@ def get_img(p):
         except: return ""
     return ""
 
-# --- INTERFACCIA E CSS ADATTIVO (MOBILE FRIENDLY) ---
+# --- INTERFACCIA E CSS ADATTIVO ---
 all_a = load_a()
 ih = get_img("header_yoga.png")
 
 st.markdown(f"""<style>
     .stApp {{ background-color: #FDFCF0 !important; }}
     
-    /* Intestazione Standard (PC) */
     .header-img {{ 
-        width:100%; 
-        height:120px; 
-        background: url('data:image/png;base64,{ih}') no-repeat center; 
-        background-size: contain; 
-        border-bottom: 3px solid #C5A059; 
+        width:100%; height:120px; background: url('data:image/png;base64,{ih}') no-repeat center; 
+        background-size: contain; border-bottom: 3px solid #C5A059; 
     }}
     
     .header-bar {{ 
@@ -75,12 +71,8 @@ st.markdown(f"""<style>
     }}
     div[data-testid="stPopover"] button[kind="secondary"]:hover {{ color: #C5A059 !important; text-decoration: underline !important; }}
 
-    /* OTTIMIZZAZIONE PER CELLULARI */
     @media (max-width: 768px) {{
-        .header-img {{ 
-            height: 80px !important; /* Aumenta l'altezza minima su cellulare */
-            background-size: cover !important; /* L'immagine riempie meglio lo spazio senza rimpicciolirsi troppo */
-        }}
+        .header-img {{ height: 80px !important; background-size: cover !important; }}
         .header-bar {{ font-size: 1.1rem !important; letter-spacing: 1px !important; padding: 10px !important; }}
         .art-box {{ padding: 20px !important; }}
         .art-box h1 {{ font-size: 1.4rem !important; line-height: 1.2 !important; }}
