@@ -28,11 +28,10 @@ def get_img(p):
 all_a = load_a()
 ih = get_img("header_yoga.png")
 
-# --- CSS: MIMETIZZAZIONE CORNICE E RIPRISTINO HEADER ---
+# --- CSS: TASTI BLU CON SCRITTE BIANCHE ---
 st.markdown(f"""<style>
     .stApp {{ background-color: #FDFCF0 !important; }}
     
-    /* Immagine in alto ripristinata */
     .header-img {{ 
         width:100%; height:150px; background: url('data:image/png;base64,{ih}') no-repeat center; 
         background-size: contain; margin-bottom: 10px;
@@ -43,39 +42,51 @@ st.markdown(f"""<style>
         text-align:center; font-size:1.6rem; letter-spacing:2px; margin-bottom:20px; 
     }}
 
-    /* STILE POPOVER (IL TASTO) */
+    /* STILE TASTI MENU (BLU CON SCRITTA BIANCA) */
     div[data-testid="stPopover"] > button {{
-        background-color: transparent !important;
-        color: #1A2E44 !important;
-        border: 1px solid #C5A059 !important; /* Cornice dorata sottile sul tasto */
-        border-radius: 0px !important;
+        background-color: #1A2E44 !important;
+        color: #FDFCF0 !important;
+        border: 1px solid #C5A059 !important;
+        border-radius: 4px !important;
         font-family: serif !important;
+        font-size: 1.1rem !important;
+        font-weight: normal !important;
+        padding: 10px 20px !important;
+        transition: 0.3s;
     }}
 
-    /* STILE TENDINA (IL CONTENUTO CHE APPARE) */
+    /* Effetto quando passi sopra il tasto blu */
+    div[data-testid="stPopover"] > button:hover {{
+        background-color: #C5A059 !important;
+        color: #1A2E44 !important;
+        border: 1px solid #1A2E44 !important;
+    }}
+
+    /* STILE TENDINA INTERNA */
     div[data-testid="stPopoverContent"] {{
         background-color: #FDFCF0 !important;
-        border: 1px solid #C5A059 !important; /* Rendiamo la cornice dorata invece che grigia */
-        box-shadow: none !important;
-        padding: 10px !important;
+        border: 1px solid #C5A059 !important;
+        box-shadow: 0px 4px 15px rgba(0,0,0,0.1) !important;
         width: 250px !important;
     }}
     
-    /* Bottoni dentro la tendina */
+    /* Bottoni degli articoli dentro la tendina */
     div[data-testid="stPopoverContent"] button {{
         text-align: left !important;
         background: transparent !important;
         border: none !important;
         color: #1A2E44 !important;
-        padding: 5px 0px !important;
+        font-family: serif !important;
+        border-bottom: 1px solid #eee !important;
+        border-radius: 0px !important;
     }}
     
     div[data-testid="stPopoverContent"] button:hover {{
         color: #C5A059 !important;
-        text-decoration: underline !important;
+        background-color: #f9f9f9 !important;
     }}
 
-    .art-box {{ background: white; padding:30px; border-radius:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color:#1A2E44; }}
+    .art-box {{ background: white; padding:40px; border-radius:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color:#1A2E44; }}
 </style>
 <div class="header-img"></div>
 <div class="header-bar">S O R G E N T E &nbsp; Y O G A</div>""", unsafe_allow_html=True)
@@ -84,7 +95,6 @@ st.markdown(f"""<style>
 if 'sel_idx' not in st.session_state: st.session_state['sel_idx'] = 0 if all_a else None
 if 'mode' not in st.session_state: st.session_state['mode'] = 'view'
 
-# Colonne per i menu a tendina
 c1, c2, c3 = st.columns(3)
 
 with c1:
@@ -108,24 +118,27 @@ with c3:
                 if st.button(a['titolo'], key=f"sci_{i}"):
                     st.session_state.update({"sel_idx": i, "mode": "view"}); st.rerun()
 
-# --- AREA CONTENUTO ---
 st.write("---")
+
+# --- AREA CONTENUTO ---
 if st.session_state.sel_idx is not None and st.session_state.mode == "view":
     art = all_a[st.session_state.sel_idx]
     st.markdown(f"""<div class="art-box">
-        <h1 style="font-family:serif; margin-top:0;">{art['titolo']}</h1>
+        <h1 style="font-family:serif; margin-top:0; color:#1A2E44;">{art['titolo']}</h1>
         <p style="color:#C5A059; font-style:italic;">{art['data']}</p>
-        <div style="font-size:1.1rem; line-height:1.6; font-family:serif;">
+        <div style="font-size:1.15rem; line-height:1.7; font-family:serif; color:#333;">
             {art['testo'].replace(chr(10), '<br>')}
         </div>
     </div>""", unsafe_allow_html=True)
 
-# --- TASTI GESTIONE IN FONDO ---
+# --- AREA EDITORE (GESTIONE NUOVO/MODIFICA) ---
 st.write("<br><br>", unsafe_allow_html=True)
 col_ed1, col_ed2 = st.columns(2)
 with col_ed1:
     if st.button("➕ NUOVO ARTICOLO", use_container_width=True):
-        st.session_state.mode = 'new'; st.rerun()
+        # Aggiungi qui la logica per mostrare i campi di inserimento
+        st.info("Funzione nuovo articolo pronta") 
 with col_ed2:
-    if st.button("📝 MODIFICA QUESTO", use_container_width=True):
-        st.session_state.mode = 'edit'; st.rerun()
+    if st.button("📝 MODIFICA QUESTO ARTICOLO", use_container_width=True):
+        # Aggiungi qui la logica per mostrare i campi di modifica
+        st.info("Funzione modifica pronta")
