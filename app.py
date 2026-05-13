@@ -46,28 +46,35 @@ def get_img(p):
         except: return ""
     return ""
 
-# --- INTERFACCIA E CSS ---
+# --- INTERFACCIA E CSS ADATTIVO (MOBILE FRIENDLY) ---
 all_a = load_a()
 ih = get_img("header_yoga.png")
 
 st.markdown(f"""<style>
     .stApp {{ background-color: #FDFCF0 !important; }}
     .header-img {{ width:100%; height:100px; background: url('data:image/png;base64,{ih}') no-repeat center; background-size: contain; border-bottom: 3px solid #C5A059; }}
-    .header-bar {{ background:#1A2E44; padding:15px; color:#FDFCF0; font-family: serif; text-align:center; font-size:1.6rem; letter-spacing:2px; margin-bottom:20px; }}
-    .art-box {{ background: white; padding:40px; border-radius:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color:#1A2E44; min-height:500px; }}
     
-    div[data-testid="stPopover"] button[kind="secondary"] {{
-        background: transparent !important;
-        border: none !important;
-        color: #1A2E44 !important;
-        text-align: left !important;
-        padding: 5px 0px !important;
-        font-size: 1.1rem !important;
-        justify-content: flex-start !important;
+    .header-bar {{ 
+        background:#1A2E44; padding:15px; color:#FDFCF0; font-family: serif; 
+        text-align:center; font-size:1.6rem; letter-spacing:2px; margin-bottom:20px; 
     }}
-    div[data-testid="stPopover"] button[kind="secondary"]:hover {{
-        color: #C5A059 !important;
-        text-decoration: underline !important;
+    
+    .art-box {{ background: white; padding:30px; border-radius:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color:#1A2E44; min-height:500px; }}
+    
+    /* Stile bottoni invisibili nelle tendine */
+    div[data-testid="stPopover"] button[kind="secondary"] {{
+        background: transparent !important; border: none !important; color: #1A2E44 !important;
+        text-align: left !important; padding: 5px 0px !important; font-size: 1.1rem !important; justify-content: flex-start !important;
+    }}
+    div[data-testid="stPopover"] button[kind="secondary"]:hover {{ color: #C5A059 !important; text-decoration: underline !important; }}
+
+    /* OTTIMIZZAZIONE PER CELLULARI */
+    @media (max-width: 768px) {{
+        .header-bar {{ font-size: 1.1rem !important; letter-spacing: 1px !important; padding: 10px !important; }}
+        .art-box {{ padding: 15px !important; }}
+        .art-box h1 {{ font-size: 1.4rem !important; }}
+        /* Nascondiamo la colonna "vuoto" su mobile per recuperare spazio */
+        div[data-testid="column"]:first-child {{ display: none !important; }}
     }}
 </style>
 <div class="header-img"></div>
@@ -77,7 +84,8 @@ if 'sel_idx' not in st.session_state: st.session_state['sel_idx'] = 0 if all_a e
 if 'mode' not in st.session_state: st.session_state['mode'] = "view"
 
 # --- NAVIGAZIONE ---
-vuoto, c1, c2, c3, c4 = st.columns([0.15, 0.2, 0.2, 0.2, 0.25])
+# Su PC usa lo spazio vuoto, su Mobile il CSS sopra lo nasconde
+vuoto, c1, c2, c3 = st.columns([0.15, 0.25, 0.25, 0.25])
 
 with c1:
     with st.popover("📂 ARCHIVIO", use_container_width=True):
@@ -110,7 +118,7 @@ if st.session_state['mode'] == "view":
             <h1 style="font-family:serif; color:#1A2E44; margin-top:0;">{display["titolo"]}</h1>
             <p style="color:#C5A059; font-style:italic;">{display["data"]}</p>
             <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
-            <div style="font-family:serif; font-size:1.2rem; line-height:1.8; color:#333;">
+            <div style="font-family:serif; font-size:1.1rem; line-height:1.6; color:#333;">
                 {display["testo"].replace(chr(10), '<br>')}
             </div>
         </div>""", unsafe_allow_html=True)
