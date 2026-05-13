@@ -2,7 +2,6 @@ import streamlit as st
 import base64, os, json, requests
 from datetime import datetime as dt
 
-# Configurazione iniziale
 st.set_page_config(page_title="SORGENTE YOGA", layout="wide", page_icon="🧘")
 
 # --- CONFIGURAZIONE GITHUB ---
@@ -47,37 +46,42 @@ def get_img(p):
         except: return ""
     return ""
 
-# --- CARICAMENTO DATI E IMMAGINE ---
+# --- INTERFACCIA E CSS DEFINITIVO ---
 all_a = load_a()
 ih = get_img("header_yoga.png")
 
-# --- INTERFACCIA E CSS DEFINITIVO (STILE "SI") ---
 st.markdown(f"""<style>
+    /* Sfondo Generale */
     .stApp {{ background-color: #FDFCF0 !important; }}
     
+    /* Header */
     .header-img {{ 
         width:100%; height:120px; background: url('data:image/png;base64,{ih}') no-repeat center; 
         background-size: contain; border-bottom: 3px solid #C5A059; 
     }}
-    
     .header-bar {{ 
         background:#1A2E44; padding:15px; color:#FDFCF0; font-family: serif; 
         text-align:center; font-size:1.6rem; letter-spacing:2px; margin-bottom:20px; 
     }}
     
+    /* Box Articolo */
     .art-box {{ background: white; padding:30px; border-radius:8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color:#1A2E44; min-height:500px; }}
 
-    /* RESET TENDINE - EFFETTO TESTO PULITO */
+    /* --- PULIZIA TENDINE (STILE "SI") --- */
+    /* Rimuove cornice, ombra e sfondo dai popover */
     div[data-testid="stPopoverContent"] {{
-        background-color: transparent !important;
+        background: transparent !important;
         border: none !important;
         box-shadow: none !important;
     }}
     
+    /* Rimuove lo sfondo bianco interno al fumetto */
     div[data-testid="stPopoverBody"] {{
-        background-color: transparent !important;
+        background: transparent !important;
+        border: none !important;
     }}
 
+    /* Trasforma i bottoni della lista in testo semplice */
     div[data-testid="stPopoverContent"] button {{
         background: transparent !important;
         border: none !important;
@@ -86,86 +90,88 @@ st.markdown(f"""<style>
         text-align: left !important;
         font-family: serif !important;
         font-size: 1.1rem !important;
-        min-height: 0px !important;
-        width: 100% !important;
         justify-content: flex-start !important;
+        min-height: 0px !important;
     }}
 
+    /* Effetto Hover (Oro) */
     div[data-testid="stPopoverContent"] button:hover {{
         color: #C5A059 !important;
         text-decoration: underline !important;
     }}
 
-    /* Nasconde freccia popover */
-    div[data-testid="stPopoverContent"] > div:first-child {{ display: none !important; }}
+    /* Nasconde la punta del fumetto */
+    div[data-testid="stPopoverContent"] > div:first-child {{
+        display: none !important;
+    }}
 
     @media (max-width: 768px) {{
         .header-img {{ height: 80px !important; background-size: cover !important; }}
-        .header-bar {{ font-size: 1.1rem !important; padding: 10px !important; }}
+        .header-bar {{ font-size: 1.1rem !important; letter-spacing: 1px !important; padding: 10px !important; }}
+        div[data-testid="column"]:first-child {{ display: none !important; }}
     }}
 </style>
 <div class="header-img"></div>
 <div class="header-bar">S O R G E N T E &nbsp; Y O G A</div>""", unsafe_allow_html=True)
 
-# --- STATO DELLA SESSIONE ---
-if 'sel_idx' not in st.session_state: st.session_state.sel_idx = 0 if all_a else None
-if 'mode' not in st.session_state: st.session_state.mode = "view"
+if 'sel_idx' not in st.session_state: st.session_state['sel_idx'] = 0 if all_a else None
+if 'mode' not in st.session_state: st.session_state['mode'] = "view"
 
 # --- NAVIGAZIONE ---
-c1, c2, c3 = st.columns(3)
+# Ho aggiunto un piccolo spazio tra le colonne per evitare che si "pestino" i piedi
+vuoto, c1, c2, c3 = st.columns([0.1, 0.3, 0.3, 0.3])
 
 with c1:
-    with st.popover("📂 ARCHIVIO", use_container_width=True):
-        for i, a in enumerate(all_a):
-            if str(a.get('cat','')).upper() in ["BLOG", ""]:
-                if st.button(a['titolo'], key=f"nav_b_{i}"):
-                    st.session_state.update({"sel_idx": i, "mode": "view"})
-                    st.rerun()
+    with st.popover("📂 ARCHIVIO"):
+        blog_list = [(i, a) for i, a in enumerate(all_a) if str(a.get('cat','')).upper() == 'BLOG' or not a.get('cat')]
+        for idx, a in blog_list:
+            if st.button(a['titolo'], key=f"b_{idx}", use_container_width=True):
+                st.session_state['sel_idx'] = idx; st.session_state['mode'] = "view"; st.rerun()
 
 with c2:
-    with st.popover("📜 TESTI ANTICHI", use_container_width=True):
-        for i, a in enumerate(all_a):
-            if str(a.get('cat','')).upper() == "TESTI":
-                if st.button(a['titolo'], key=f"nav_t_{i}"):
-                    st.session_state.update({"sel_idx": i, "mode": "view"})
-                    st.rerun()
+    with st.popover("📜 TESTI ANTICHI"):
+        testi_list = [(i, a) for i, a in enumerate(all_a) if str(a.get('cat','')).upper() == 'TESTI']
+        for idx, a in testi_list:
+            if st.button(a['titolo'], key=f"t_{idx}", use_container_width=True):
+                st.session_state['sel_idx'] = idx; st.session_state['mode'] = "view"; st.rerun()
 
 with c3:
-    with st.popover("🔬 SCIENZA", use_container_width=True):
-        for i, a in enumerate(all_a):
-            if str(a.get('cat','')).upper() == "SCIENZA":
-                if st.button(a['titolo'], key=f"nav_s_{i}"):
-                    st.session_state.update({"sel_idx": i, "mode": "view"})
-                    st.rerun()
+    with st.popover("🔬 SCIENZA"):
+        sci_list = [(i, a) for i, a in enumerate(all_a) if str(a.get('cat','')).upper() == 'SCIENZA']
+        for idx, a in sci_list:
+            if st.button(a['titolo'], key=f"s_{idx}", use_container_width=True):
+                st.session_state['sel_idx'] = idx; st.session_state['mode'] = "view"; st.rerun()
 
 # --- AREA CONTENUTO ---
-s_idx = st.session_state.sel_idx
+s_idx = st.session_state['sel_idx']
 
-if st.session_state.mode == "view":
+if st.session_state['mode'] == "view":
     if s_idx is not None and s_idx < len(all_a):
-        art = all_a[s_idx]
+        display = all_a[s_idx]
         st.markdown(f"""<div class="art-box">
-            <h1 style="font-family:serif; color:#1A2E44; margin-top:0;">{art["titolo"]}</h1>
-            <p style="color:#C5A059; font-style:italic;">{art["data"]}</p>
+            <h1 style="font-family:serif; color:#1A2E44; margin-top:0;">{display["titolo"]}</h1>
+            <p style="color:#C5A059; font-style:italic;">{display["data"]}</p>
             <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
             <div style="font-family:serif; font-size:1.1rem; line-height:1.6; color:#333;">
-                {art["testo"].replace(chr(10), '<br>')}
+                {display["testo"].replace(chr(10), '<br>')}
             </div>
         </div>""", unsafe_allow_html=True)
-    else:
-        st.info("Benvenuto. Seleziona un articolo dai menu sopra.")
 
-elif st.session_state.mode == "edit" and s_idx is not None:
+elif st.session_state['mode'] == "edit" and s_idx is not None:
     st.subheader("Modifica Articolo")
     curr = all_a[s_idx]
     new_t = st.text_input("Titolo", value=curr['titolo'])
-    new_c = st.radio("Sezione", ["BLOG", "TESTI", "SCIENZA"], index=["BLOG", "TESTI", "SCIENZA"].index(str(curr.get('cat','BLOG')).upper()))
+    cat_options = ["BLOG", "TESTI", "SCIENZA"]
+    try: idx_cat = cat_options.index(str(curr.get('cat','')).upper())
+    except: idx_cat = 0
+    new_c = st.radio("Sezione", cat_options, index=idx_cat)
     new_x = st.text_area("Testo", value=curr['testo'], height=400)
-    if st.button("SALVA"):
-        all_a[s_idx].update({"titolo": new_t, "testo": new_x, "cat": new_c})
-        save_a(all_a); st.session_state.mode = "view"; st.rerun()
+    if st.button("SALVA MODIFICHE"):
+        all_a[s_idx] = {"data": curr['data'], "titolo": new_t, "testo": new_x, "cat": new_c}
+        save_a(all_a)
+        st.session_state['mode'] = "view"; st.rerun()
 
-elif st.session_state.mode == "new":
+elif st.session_state['mode'] == "new":
     st.subheader("Nuovo Articolo")
     t_n = st.text_input("Titolo")
     c_n = st.radio("Sezione", ["BLOG", "TESTI", "SCIENZA"])
@@ -173,14 +179,16 @@ elif st.session_state.mode == "new":
     if st.button("PUBBLICA"):
         if t_n and x_n:
             all_a.insert(0, {"data": dt.now().strftime("%d/%m/%Y"), "titolo": t_n, "testo": x_n, "cat": c_n})
-            save_a(all_a); st.session_state.update({"sel_idx": 0, "mode": "view"}); st.rerun()
+            save_a(all_a)
+            st.session_state['sel_idx'] = 0
+            st.session_state['mode'] = "view"; st.rerun()
 
-# --- EDITOR ---
+# --- AREA EDITORE ---
 st.write("<br><br>---", unsafe_allow_html=True)
 ce1, ce2 = st.columns(2)
 with ce1:
     if st.button("➕ NUOVO ARTICOLO", use_container_width=True):
-        st.session_state.mode = "new"; st.rerun()
+        st.session_state['mode'] = "new"; st.rerun()
 with ce2:
     if st.button("📝 MODIFICA QUESTO ARTICOLO", use_container_width=True):
-        st.session_state.mode = "edit"; st.rerun()
+        st.session_state['mode'] = "edit"; st.rerun()
